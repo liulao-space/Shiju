@@ -1,0 +1,12 @@
+.DS_Store
+.build/
+.swiftpm/
+*.xcodeproj
+dist/
+
+# 图标是生成物（Scripts/make-icon.sh 可复现），不进版本库
+Resources/Shiju.icns
+
+# 注意：Package.resolved **要提交**（所以不在这里）。
+# 这是个 executableTarget 的包，依赖 SelectedTextKit 的具体版本直接决定构建结果；
+# 忽略它意味着别人 clone 下来编出来的可能是另一个版本，而且出问题时对不上号。

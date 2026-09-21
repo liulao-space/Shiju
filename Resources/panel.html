@@ -1,0 +1,2190 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="sky" data-page-node-id="aCNASvGPIisnAoiWLFvHun">
+<head data-page-node-id="zOBkSOuFCs5Fq6QXNlCrNi">
+<meta charset="utf-8" data-page-node-id="HN4mPfiQPEclDNbE2OqTRG">
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="xmUWXcFIBrihqDQtJRmRNv">
+<title>拾句 · 卡片面板</title>
+<style>
+/* ============================================================
+   拾句 · 句子面板
+   目标：看起来像一个 macOS 原生窗口，而不是网页
+   规则：组件里不允许出现字面色值 / 字面圆角 / 字面模糊值
+   主题：一组 CSS 变量（见 design/tokens.css，由 gen_tokens.py 生成）
+   ============================================================ */
+
+/* <<<TOKENS>>>
+/* 拾句 · 面板主题 token —— 由 gen_tokens.py 生成，请勿手改本文件，改 THEMES */
+
+:root{
+  color-scheme: light dark;
+}
+
+/* 默认主题 = 晴空；未显式指定 data-theme 时生效 */
+:root{
+  --scheme: light;
+  --color-bg: #F3F5F8;
+  --color-bg-2: #EBEFF4;
+  --color-fill: #EAEEF3;
+  --color-surface: #FFFFFF;
+  --color-text: #16191D;
+  --color-text-2: #565F6B;
+  --color-text-3: #616B78;
+  --color-label: #454E59;
+  --color-accent: #2F6FE0;
+  --color-on-accent: #FFFFFF;
+  --color-accent-soft: #E1ECFC;
+  --color-on-accent-soft: #1B4FA8;
+  --accent-15: rgba(47,111,224,.14);
+  --color-line: #E1E6EC;
+  --hairline: rgba(20,30,45,.09);
+  --shadow-soft: 0 1px 1px rgba(16,24,40,.03), 0 8px 20px -10px rgba(16,24,40,.10);
+  --shadow-lift: 0 2px 4px rgba(16,24,40,.05), 0 20px 44px -16px rgba(16,24,40,.18);
+  --glass: blur(18px) saturate(1.6);
+  --glass-top: saturate(1.8) blur(22px);
+  --radius: 14px;
+  --font-display: ui-sans-serif, "SF Pro Display", -apple-system, "PingFang SC", system-ui;
+  --font-text: -apple-system, "SF Pro Text", "PingFang SC", "Helvetica Neue", "Noto Sans CJK SC", sans-serif;
+  --scrim: rgba(12,18,26,.26);
+  --text-tracking: .004em;
+}
+
+/* 晴空 — 默认 · 冷白干净 */
+:root[data-theme="sky"]{
+  --scheme: light;
+  --color-bg: #F3F5F8;
+  --color-bg-2: #EBEFF4;
+  --color-fill: #EAEEF3;
+  --color-surface: #FFFFFF;
+  --color-text: #16191D;
+  --color-text-2: #565F6B;
+  --color-text-3: #616B78;
+  --color-label: #454E59;
+  --color-accent: #2F6FE0;
+  --color-on-accent: #FFFFFF;
+  --color-accent-soft: #E1ECFC;
+  --color-on-accent-soft: #1B4FA8;
+  --accent-15: rgba(47,111,224,.14);
+  --color-line: #E1E6EC;
+  --hairline: rgba(20,30,45,.09);
+  --shadow-soft: 0 1px 1px rgba(16,24,40,.03), 0 8px 20px -10px rgba(16,24,40,.10);
+  --shadow-lift: 0 2px 4px rgba(16,24,40,.05), 0 20px 44px -16px rgba(16,24,40,.18);
+  --glass: blur(18px) saturate(1.6);
+  --glass-top: saturate(1.8) blur(22px);
+  --radius: 14px;
+  --font-display: ui-sans-serif, "SF Pro Display", -apple-system, "PingFang SC", system-ui;
+  --font-text: -apple-system, "SF Pro Text", "PingFang SC", "Helvetica Neue", "Noto Sans CJK SC", sans-serif;
+  --scrim: rgba(12,18,26,.26);
+  --text-tracking: .004em;
+}
+
+/* 苔绿 — 日间护眼 · 草木淡绿 */
+:root[data-theme="moss"]{
+  --scheme: light;
+  --color-bg: #ECF1EA;
+  --color-bg-2: #E3EBE1;
+  --color-fill: #E2EBE0;
+  --color-surface: #FBFDF9;
+  --color-text: #17201A;
+  --color-text-2: #4C584C;
+  --color-text-3: #576456;
+  --color-label: #3B473C;
+  --color-accent: #3A7D54;
+  --color-on-accent: #FFFFFF;
+  --color-accent-soft: #D7E9D8;
+  --color-on-accent-soft: #1C4A2E;
+  --accent-15: rgba(58,125,84,.16);
+  --color-line: #D6E0D3;
+  --hairline: rgba(26,45,30,.10);
+  --shadow-soft: 0 1px 1px rgba(20,40,25,.04), 0 8px 20px -12px rgba(20,40,25,.14);
+  --shadow-lift: 0 2px 5px rgba(20,40,25,.06), 0 20px 44px -18px rgba(20,40,25,.20);
+  --glass: blur(18px) saturate(1.5);
+  --glass-top: saturate(1.7) blur(22px);
+  --radius: 16px;
+  --font-display: "PingFang SC", ui-sans-serif, -apple-system, system-ui;
+  --font-text: "Songti SC", "Noto Serif CJK SC", "PingFang SC", Georgia, serif;
+  --scrim: rgba(14,26,18,.24);
+  --text-tracking: .006em;
+}
+
+/* 雾蓝 — 冷静 · 适合长句 */
+:root[data-theme="mist"]{
+  --scheme: light;
+  --color-bg: #E9EFF5;
+  --color-bg-2: #DEE7F0;
+  --color-fill: #DBE4EE;
+  --color-surface: #FBFCFE;
+  --color-text: #171C22;
+  --color-text-2: #4C5765;
+  --color-text-3: #566371;
+  --color-label: #3D4854;
+  --color-accent: #3A7396;
+  --color-on-accent: #FFFFFF;
+  --color-accent-soft: #D6E7F2;
+  --color-on-accent-soft: #16405A;
+  --accent-15: rgba(58,115,150,.16);
+  --color-line: #D3DEE9;
+  --hairline: rgba(20,35,50,.10);
+  --shadow-soft: 0 1px 1px rgba(16,35,55,.04), 0 8px 20px -12px rgba(16,35,55,.14);
+  --shadow-lift: 0 2px 5px rgba(16,35,55,.07), 0 20px 44px -18px rgba(16,35,55,.20);
+  --glass: blur(20px) saturate(1.6);
+  --glass-top: saturate(1.8) blur(24px);
+  --radius: 12px;
+  --font-display: ui-sans-serif, "SF Pro Display", -apple-system, system-ui;
+  --font-text: ui-sans-serif, "PingFang SC", "Helvetica Neue", sans-serif;
+  --scrim: rgba(14,26,38,.24);
+  --text-tracking: .01em;
+}
+
+/* 夜览 — 深色 · 中性不偏色 */
+:root[data-theme="night"]{
+  --scheme: dark;
+  --color-bg: #1F242B;
+  --color-bg-2: #171B21;
+  --color-fill: #2B313A;
+  --color-surface: #262C34;
+  --color-text: #E8ECF1;
+  --color-text-2: #9FA9B6;
+  --color-text-3: #97A2B0;
+  --color-label: #BAC3CE;
+  --color-accent: #6BA9F5;
+  --color-on-accent: #0B1420;
+  --color-accent-soft: #1E3350;
+  --color-on-accent-soft: #BED9FA;
+  --accent-15: rgba(107,169,245,.22);
+  --color-line: #333B46;
+  --hairline: rgba(255,255,255,.08);
+  --shadow-soft: 0 1px 0 rgba(255,255,255,.03), 0 10px 24px -14px rgba(0,0,0,.6);
+  --shadow-lift: 0 2px 6px rgba(0,0,0,.3), 0 26px 50px -18px rgba(0,0,0,.7);
+  --glass: blur(18px) saturate(1.3);
+  --glass-top: saturate(1.4) blur(22px);
+  --radius: 14px;
+  --font-display: ui-sans-serif, "SF Pro Display", -apple-system, system-ui;
+  --font-text: -apple-system, "SF Pro Text", "PingFang SC", system-ui, sans-serif;
+  --scrim: rgba(0,2,6,.55);
+  --text-tracking: .004em;
+}
+
+/* 灯下 — 深夜暖光 · 低蓝光 */
+:root[data-theme="lamp"]{
+  --scheme: dark;
+  --color-bg: #221B14;
+  --color-bg-2: #1A140E;
+  --color-fill: #2E2418;
+  --color-surface: #291F16;
+  --color-text: #F0E4D0;
+  --color-text-2: #C2AC8C;
+  --color-text-3: #A08B6C;
+  --color-label: #D6C6AC;
+  --color-accent: #E8B25E;
+  --color-on-accent: #241A08;
+  --color-accent-soft: #3C2E19;
+  --color-on-accent-soft: #EDD6AA;
+  --accent-15: rgba(232,178,94,.20);
+  --color-line: #3A2E20;
+  --hairline: rgba(255,225,180,.10);
+  --shadow-soft: 0 10px 26px -16px rgba(0,0,0,.7);
+  --shadow-lift: 0 16px 40px -18px rgba(0,0,0,.8);
+  --glass: blur(18px) saturate(1.25);
+  --glass-top: saturate(1.4) blur(22px);
+  --radius: 12px;
+  --font-display: "Songti SC", "Noto Serif CJK SC", Georgia, serif;
+  --font-text: "Songti SC", "Noto Serif CJK SC", "PingFang SC", Georgia, serif;
+  --scrim: rgba(12,6,0,.55);
+  --text-tracking: .008em;
+}
+
+/* 纸间 — 纸书质感 · 宋体 + 暖米 */
+:root[data-theme="paper"]{
+  --scheme: light;
+  --color-bg: #F5F2EC;
+  --color-bg-2: #EFEAE1;
+  --color-fill: #EBE5DA;
+  --color-surface: #FCFAF6;
+  --color-text: #211C15;
+  --color-text-2: #5C5347;
+  --color-text-3: #6A6053;
+  --color-label: #4A4236;
+  --color-accent: #97682A;
+  --color-on-accent: #FFFFFF;
+  --color-accent-soft: #F0E4CE;
+  --color-on-accent-soft: #6B4713;
+  --accent-15: rgba(151,104,42,.18);
+  --color-line: #E2DBCE;
+  --hairline: rgba(45,35,20,.10);
+  --shadow-soft: 0 1px 1px rgba(45,35,20,.04), 0 8px 20px -12px rgba(45,35,20,.10);
+  --shadow-lift: 0 2px 5px rgba(45,35,20,.06), 0 20px 44px -18px rgba(45,35,20,.16);
+  --glass: blur(16px) saturate(1.2);
+  --glass-top: saturate(1.3) blur(20px);
+  --radius: 10px;
+  --font-display: "Songti SC", "Noto Serif CJK SC", Georgia, serif;
+  --font-text: "Songti SC", "Noto Serif CJK SC", "PingFang SC", Georgia, serif;
+  --scrim: rgba(30,22,10,.26);
+  --text-tracking: .008em;
+}
+
+/* 丹宁 — 硬边 · 行距紧 · 效率向 */
+:root[data-theme="denim"]{
+  --scheme: light;
+  --color-bg: #E7ECF4;
+  --color-bg-2: #DCE4EF;
+  --color-fill: #D8E1EC;
+  --color-surface: #FAFCFF;
+  --color-text: #141A24;
+  --color-text-2: #4B586B;
+  --color-text-3: #55637A;
+  --color-label: #38465A;
+  --color-accent: #33517E;
+  --color-on-accent: #FFFFFF;
+  --color-accent-soft: #D8E3F2;
+  --color-on-accent-soft: #1C3557;
+  --accent-15: rgba(51,81,126,.18);
+  --color-line: #D1DAE6;
+  --hairline: rgba(18,30,48,.12);
+  --shadow-soft: 0 1px 1px rgba(18,30,48,.04);
+  --shadow-lift: 0 2px 5px rgba(18,30,48,.08), 0 18px 40px -20px rgba(18,30,48,.22);
+  --glass: blur(14px) saturate(1.4);
+  --glass-top: saturate(1.5) blur(18px);
+  --radius: 8px;
+  --font-display: ui-sans-serif, "SF Pro Display", -apple-system, system-ui;
+  --font-text: -apple-system, "SF Pro Text", "PingFang SC", "Helvetica Neue", "Noto Sans CJK SC", sans-serif;
+  --scrim: rgba(10,18,30,.30);
+  --text-tracking: .002em;
+}
+
+/* 石墨 — 深色 · 冷灰蓝 不刺眼 */
+:root[data-theme="graphite"]{
+  --scheme: dark;
+  --color-bg: #232629;
+  --color-bg-2: #1C1F22;
+  --color-fill: #2E3236;
+  --color-surface: #292D31;
+  --color-text: #E6E8EA;
+  --color-text-2: #A2A9B0;
+  --color-text-3: #98A0A8;
+  --color-label: #BFC5CB;
+  --color-accent: #7FB8E8;
+  --color-on-accent: #0D161E;
+  --color-accent-soft: #1F3444;
+  --color-on-accent-soft: #BADCF7;
+  --accent-15: rgba(127,184,232,.22);
+  --color-line: #363B41;
+  --hairline: rgba(255,255,255,.08);
+  --shadow-soft: 0 1px 0 rgba(255,255,255,.03), 0 10px 24px -14px rgba(0,0,0,.55);
+  --shadow-lift: 0 2px 6px rgba(0,0,0,.28), 0 26px 50px -18px rgba(0,0,0,.65);
+  --glass: blur(18px) saturate(1.3);
+  --glass-top: saturate(1.4) blur(22px);
+  --radius: 14px;
+  --font-display: ui-sans-serif, "SF Pro Display", -apple-system, system-ui;
+  --font-text: -apple-system, "SF Pro Text", "PingFang SC", system-ui, sans-serif;
+  --scrim: rgba(0,2,6,.55);
+  --text-tracking: .004em;
+}
+
+/* 沉褐 — 深色 · 纸书夜读 暖褐 */
+:root[data-theme="sepia"]{
+  --scheme: dark;
+  --color-bg: #271F18;
+  --color-bg-2: #1E1712;
+  --color-fill: #332920;
+  --color-surface: #2E251C;
+  --color-text: #EDE0CC;
+  --color-text-2: #BCA88E;
+  --color-text-3: #B6A180;
+  --color-label: #D2BFA4;
+  --color-accent: #D9A56A;
+  --color-on-accent: #241A0F;
+  --color-accent-soft: #3F3122;
+  --color-on-accent-soft: #EBD4B1;
+  --accent-15: rgba(217,165,106,.20);
+  --color-line: #3D3226;
+  --hairline: rgba(240,210,160,.11);
+  --shadow-soft: 0 10px 26px -16px rgba(0,0,0,.65);
+  --shadow-lift: 0 16px 40px -18px rgba(0,0,0,.75);
+  --glass: blur(18px) saturate(1.25);
+  --glass-top: saturate(1.35) blur(22px);
+  --radius: 10px;
+  --font-display: "Songti SC", "Noto Serif CJK SC", Georgia, serif;
+  --font-text: "Songti SC", "Noto Serif CJK SC", "PingFang SC", Georgia, serif;
+  --scrim: rgba(12,6,0,.58);
+  --text-tracking: .008em;
+}
+
+/* 水墨 — 深色 · 电子纸 单色高冷 */
+:root[data-theme="ink"]{
+  --scheme: dark;
+  --color-bg: #212223;
+  --color-bg-2: #1A1B1C;
+  --color-fill: #2B2C2E;
+  --color-surface: #262728;
+  --color-text: #E9E9E8;
+  --color-text-2: #A5A6A4;
+  --color-text-3: #9B9C9A;
+  --color-label: #C2C3C1;
+  --color-accent: #D6D5D1;
+  --color-on-accent: #191919;
+  --color-accent-soft: #2F3030;
+  --color-on-accent-soft: #E4E3DF;
+  --accent-15: rgba(214,213,209,.18);
+  --color-line: #353637;
+  --hairline: rgba(255,255,255,.07);
+  --shadow-soft: 0 1px 0 rgba(255,255,255,.02);
+  --shadow-lift: 0 12px 34px -18px rgba(0,0,0,.6);
+  --glass: blur(14px) saturate(1.1);
+  --glass-top: saturate(1.15) blur(18px);
+  --radius: 6px;
+  --font-display: ui-sans-serif, "SF Pro Display", -apple-system, system-ui;
+  --font-text: "Songti SC", "Noto Serif CJK SC", "PingFang SC", Georgia, serif;
+  --scrim: rgba(0,0,0,.6);
+  --text-tracking: .012em;
+}
+
+/* 自动：跟随系统深色（.panel 上写 data-theme="auto" 即启用） */
+@media (prefers-color-scheme: dark){
+  :root[data-theme="auto"], :root:not([data-theme]){
+    --scheme: dark;
+    --color-bg: #1F242B;
+    --color-bg-2: #171B21;
+    --color-fill: #2B313A;
+    --color-surface: #262C34;
+    --color-text: #E8ECF1;
+    --color-text-2: #9FA9B6;
+    --color-text-3: #97A2B0;
+    --color-label: #BAC3CE;
+    --color-accent: #6BA9F5;
+    --color-on-accent: #0B1420;
+    --color-accent-soft: #1E3350;
+    --color-on-accent-soft: #BED9FA;
+    --accent-15: rgba(107,169,245,.22);
+    --color-line: #333B46;
+    --hairline: rgba(255,255,255,.08);
+    --shadow-soft: 0 1px 0 rgba(255,255,255,.03), 0 10px 24px -14px rgba(0,0,0,.6);
+    --shadow-lift: 0 2px 6px rgba(0,0,0,.3), 0 26px 50px -18px rgba(0,0,0,.7);
+    --glass: blur(18px) saturate(1.3);
+    --glass-top: saturate(1.4) blur(22px);
+    --radius: 14px;
+    --font-display: ui-sans-serif, "SF Pro Display", -apple-system, system-ui;
+    --font-text: -apple-system, "SF Pro Text", "PingFang SC", system-ui, sans-serif;
+    --scrim: rgba(0,2,6,.55);
+    --text-tracking: .004em;
+  }
+}
+
+/* 来源标识色：不随主题变（仅用于 16px 徽标），组件里禁止再写字面色值 */
+:root{
+  --brand-safari: #2E7CC4;
+  --brand-safari-on: #FFFFFF;   /* 徽标字色，由底色亮度决定 */
+  --brand-chrome: #159AA6;
+  --brand-chrome-on: #FFFFFF;   /* 徽标字色，由底色亮度决定 */
+  --brand-wechat: #2E9E46;
+  --brand-wechat-on: #FFFFFF;   /* 徽标字色，由底色亮度决定 */
+  --brand-notes: #B97D10;
+  --brand-notes-on: #FFFFFF;   /* 徽标字色，由底色亮度决定 */
+  --brand-terminal: #5C6673;
+  --brand-terminal-on: #FFFFFF;   /* 徽标字色，由底色亮度决定 */
+  --brand-code: #9E6BD8;
+  --brand-code-on: #FFFFFF;   /* 徽标字色，由底色亮度决定 */
+}
+/* <<<END TOKENS>>> */
+
+/* ---------- 排版尺寸（不随主题变，保证结构一致） ---------- */
+:root{
+  --h-topbar: 46px;
+  /* 顶部要空出来给 macOS 的「红绿灯」按钮（关闭/最小化/缩放）。
+     窗口是 fullSizeContentView，内容铺满整个窗口、标题栏**浮在上面**，
+     不留这条就是「logo 被按钮压住」。
+     32px 是兜底值（本机实测；标准标题栏是 28，但这个值会随系统版本和无障碍设置变）。
+     原生加载完会用真实值覆盖它——见 PanelWindow.injectTitlebarInset()。
+     兜底宁大勿小：多留一点只是空一行，留少了就是内容被按钮压住。 */
+  --titlebar-h: 32px;
+  --h-topbar-total: calc(var(--h-topbar) + var(--titlebar-h));
+  --gap-grid: 12px;
+  /* 卡片内边距，上 / 右 / 下拆开写。
+     合起来写成 `14px 16px 13px` 更好看，但那样就没法在右边再加一条：
+     `calc(var(--pad-card) + 16px)` 会展开成「calc(14px 16px 13px + 16px)」，
+     是无效值，整条声明会被静默丢掉（有星标的卡片就压到角标上了）。 */
+  --pad-card-y: 14px;
+  --pad-card-x: 16px;
+  --pad-card-b: 13px;
+  --size-text: 14.5px;
+  --lh-text: 1.8;
+  --lines: 4;                    /* 兜底行数；卡片实际由 s/m/l 决定 */
+  --dur: .18s;
+  --ease: cubic-bezier(.32,.72,0,1);   /* 与 macOS 窗口动画同一族缓动 */
+  --r-ctrl: 8px;
+  --r-pop: 12px;
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; margin:0; }
+body{
+  background: var(--color-bg);
+  background-image: linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-2) 100%);
+  color: var(--color-text);
+  font-family: var(--font-text);
+  font-size: 14px;
+  letter-spacing: var(--text-tracking);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+}
+::selection{ background: var(--accent-15); }
+button{ font: inherit; color: inherit; }
+:focus-visible{ outline: 2.5px solid var(--accent-15); outline-offset: 1px; border-radius: 4px; }
+
+/* ---------- 面板 ---------- */
+.panel{ height:100%; display:flex; flex-direction:column; }
+
+/* ---------- 顶栏：macOS 工具栏的密度与材质 ---------- */
+.topbar{
+  flex: 0 0 auto;
+  /* 上面留出标题栏的高度（红绿灯在那儿），内容就不会被压住。
+     用 padding 而不是 margin，是为了让玻璃底一直铺到窗口最顶端——
+     否则标题栏那一条会和下面的顶栏分成两种材质，很割裂。 */
+  padding: var(--titlebar-h) 16px 0;
+  height: var(--h-topbar-total);
+  display: flex; align-items: center; gap: 10px;
+  background: color-mix(in srgb, var(--color-bg) 72%, transparent);
+  -webkit-backdrop-filter: var(--glass-top);
+  backdrop-filter: var(--glass-top);
+  border-bottom: 1px solid var(--hairline);
+}
+/* 拖动顶栏移动窗口。
+   注意：这里【不能】用 `-webkit-app-region: drag`——那是 Electron 的私有属性，
+   WKWebView 不实现它，写了也只会让人以为「已经支持拖动了」。
+   真正的拖动走原生桥（脚本里的 bindWindowDrag → PanelWindow.startDrag）。 */
+.topbar{ cursor: default; }
+.topbar .brand, .topbar .spacer{ cursor: grab; }
+.topbar .spacer:active, .topbar .brand:active{ cursor: grabbing; }
+
+.brand{ display:flex; align-items:center; }
+.brand__mark{
+  width:22px; height:22px; border-radius:6px; flex:0 0 auto;
+  display:grid; place-items:center;
+  font-family: var(--font-display); font-size:13px; font-weight:600; line-height:1;
+  color: var(--color-on-accent); background: var(--color-accent);
+  /* 阴影不写 rgba(0,0,0,…)：夜览/灯下加纯黑等于看不见，一律从文字色派生 */
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text) 22%, transparent);
+}
+.spacer{ flex:1 1 auto; }
+
+.search{
+  display:flex; align-items:center; gap:6px;
+  width: 230px; padding: 0 9px; height: 28px;
+  border-radius: var(--r-ctrl);
+  background: var(--color-fill);
+  border: 1px solid transparent;
+  transition: background var(--dur), border-color var(--dur);
+  /* 顶栏里**唯一**该让位的元素。
+     不写这行的话，里面 <input> 的固有宽度（默认 size≈20 字符 ≈ 190px）
+     会顶住不让缩，flex 只好去压右边的按钮——实测窗口拖到最窄（520px）时
+     「＋ 记录」只剩 55px，文字被裁。搜索框窄一点无所谓，按钮缺字就是坏了。 */
+  min-width: 0;
+}
+.search:focus-within{ background: var(--color-surface); border-color: var(--color-accent); }
+.search svg{ width:12px; height:12px; color:var(--color-text-3); flex:0 0 auto; }
+.search input{
+  flex:1 1 auto; min-width:0; border:0; background:transparent; outline:none;
+  font:inherit; font-size:12.5px; color:var(--color-text);
+}
+.search input::placeholder{ color: var(--color-text-3); }
+.search kbd{
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size:10.5px;
+  color: var(--color-text-3);
+}
+
+/* 分段控件（iOS/macOS 同款内凹滑轨） */
+.seg{
+  display:flex; align-items:center; gap:1px; padding:2px;
+  border-radius: var(--r-ctrl); background: var(--color-fill);
+}
+.seg button{
+  border:0; background:transparent; cursor:pointer;
+  padding:3px 11px; height:22px; line-height:16px;
+  font-size:12px; border-radius: 6px; color: var(--color-text-2);
+  transition: color var(--dur), background var(--dur), box-shadow var(--dur);
+}
+.seg button:hover{ color: var(--color-text); }
+.seg button[aria-pressed="true"]{
+  background: var(--color-surface); color: var(--color-text); font-weight:500;
+  box-shadow: 0 1px 2px var(--shadow-soft), 0 0 0 .5px var(--hairline);
+}
+
+.btn{
+  display:inline-flex; align-items:center; gap:6px;
+  height:28px; padding:0 11px; cursor:pointer;
+  font-size:12.5px;
+  border-radius: var(--r-ctrl);
+  border:1px solid var(--color-line);
+  background: var(--color-surface);
+  transition: background var(--dur), border-color var(--dur), filter var(--dur);
+}
+.btn:hover{ background: var(--color-fill); }
+.btn:active{ filter: brightness(.96); }
+.btn--accent{ background: var(--color-accent); color: var(--color-on-accent); border-color: transparent; }
+.btn--accent:hover{ filter: brightness(1.07); background: var(--color-accent); }
+.btn .swatch{ width:10px; height:10px; border-radius:50%; background: var(--color-accent); box-shadow:0 0 0 1px color-mix(in srgb, var(--color-text) 12%, transparent) inset; }
+/* 纯图标按钮（顶栏的快捷键设置）。
+   宽高都是 28px：不写死宽度的话，一排按钮的基线会因为内边距不同而歪。
+   字号设 0 是防「图标加载失败时冒出一个空方块」把宽度顶开。 */
+.btn--icon{ padding:0; width:28px; flex:0 0 auto; justify-content:center; font-size:0; }
+.btn--icon svg{ width:15px; height:15px; color: var(--color-text-2); }
+.btn--icon:hover svg{ color: var(--color-text); }
+
+/* ---------- 筛选 ---------- */
+.filters{
+  flex:0 0 auto; display:flex; align-items:center; gap:6px;
+  padding: 10px 16px 8px;
+}
+.chip{
+  height:24px; padding:0 11px; cursor:pointer;
+  font-size:12px; color: var(--color-label);
+  background: transparent;
+  border:1px solid var(--color-line);
+  border-radius: 100px;
+  display:inline-flex; align-items:center; gap:6px;
+  transition: background var(--dur), color var(--dur), border-color var(--dur);
+}
+.chip:hover{ background: var(--color-fill); }
+/* [hidden] 的 UA 样式是 display:none，但上面 .chip 的 display:inline-flex 是作者样式，
+   优先级更高会把它盖掉。不显式写这一条，「没有标签时藏起入口」就不生效——
+   hidden 属性设了，按钮照样杵在那儿。 */
+.chip[hidden]{ display:none; }
+.chip[aria-pressed="true"]{
+  background: var(--color-accent-soft); border-color: transparent;
+  color: var(--color-on-accent-soft); font-weight:500;
+}
+.chip .n{ font-variant-numeric: tabular-nums; opacity:.7; font-size:11px; }
+.tools{ display:inline-flex; align-items:center; gap:2px; margin-left:6px; }
+.tools[hidden]{ display:none; }
+.tbtn{
+  cursor:pointer; border:0; background:transparent;
+  height:22px; padding:0 8px; border-radius:7px;
+  font-size:11.5px; color: var(--color-text-3);
+  transition: color var(--dur), background var(--dur);
+}
+.tbtn:hover{ color: var(--color-text); background: var(--color-fill); }
+.tbtn[aria-pressed="true"]{ color: var(--color-on-accent-soft); background: var(--color-accent-soft); font-weight:500; }
+.tsep{ width:1px; height:12px; background: var(--color-line); margin:0 2px; }
+.filters__hint{ margin-left:auto; font-size:11.5px; color:var(--color-text-3); font-variant-numeric: tabular-nums; }
+
+/* ---------- 内容区 ---------- */
+.content{ flex:1 1 auto; overflow:auto; padding: 4px 16px 26px; }
+/* 不设 max-width：面板宽度是用户拖出来的，拖多宽就该用多宽。
+   一行几列由 JS 按每列最小宽度算（见 colCount），宽度封顶会让人以为「拖了没反应」。 */
+.grid{
+  margin: 0 auto;
+  display:flex; gap: var(--gap-grid); align-items:flex-start;
+}
+.col{ flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap: var(--gap-grid); }
+.grid.list{ display:flex; flex-direction:column; max-width: 900px; }
+
+/* ---------- 卡片：只有一层表面 + 1px hairline，靠留白与材质区分层级 ---------- */
+.card{
+  position:relative;
+  display:flex; flex-direction:column;
+  min-height: 0;
+  /* 有星标时右边多留一条，给右上角的角标让位。
+     正文是两端对齐的，会一直写到内容盒右沿——不让位就会和 ★ 叠在一起。 */
+  --star-w: 0px;
+  padding: var(--pad-card-y) calc(var(--pad-card-x) + var(--star-w)) var(--pad-card-b);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  -webkit-backdrop-filter: var(--glass);
+  backdrop-filter: var(--glass);
+  border: 1px solid var(--hairline);
+  box-shadow: none;
+  cursor: default;
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease),
+              transform var(--dur) var(--ease);
+  animation: cardIn .3s var(--ease) both;
+}
+@keyframes cardIn{ from{ opacity:0; transform: translateY(4px); } }
+/* pointer-events:none 是必须的：这个伪元素盖在静态流内元素之上，
+   不关掉命中就会把「星标/复制/删除」和标签的点击全吃掉，事件落到 .card 上。 */
+.card::after{ content:""; position:absolute; inset:0; z-index:0; pointer-events:none; }
+.card:hover, .card:focus-visible{
+  background: color-mix(in srgb, var(--color-surface) 96%, var(--color-accent));
+  border-color: var(--accent-15);
+  transform: translateY(-1px);
+}
+/* 卡片上**没有任何元信息**了：来源、徽标、时间、出处全在详情弹窗里。
+   卡片是拿来「扫一眼找句子」的，头上每多一行，正文就往后挪一行，
+   一屏能看的卡片就少一排。所以连头部容器 `.card__head` 一起撤掉——
+   「留个空容器」是不行的：它自带的 padding-bottom 会在正文上方留下
+   一段没有来由的空白。 */
+
+/* 星标：右上角的小角标。
+   它是用户自己按下的状态，藏起来就等于丢了反馈，所以必须留在卡片上；
+   但不能占一行——占一行的话，有星标的卡片正文会比旁边低 23px，
+   网格里一眼就看出来参差。绝对定位不参与布局，正合适。
+   `.card` 已经是 position:relative（`.card::after` 那个热区补丁要它）。 */
+.card__star{
+  position:absolute; top:9px; right:11px; z-index:1;
+  font-size:11px; line-height:1; color: var(--color-accent);
+  pointer-events:none;               /* 它只是个标记，不该挡住卡片的点击 */
+}
+.card[data-star="1"]{ --star-w: 16px; }   /* 见 .card 里那段：给角标让位 */
+/* 来源徽标：16px 字母块。颜色是产品标识（在 :root 里集中定义），不随主题变。
+   卡片上已经不用了，现在只出现在详情弹窗的「来源」行。
+   默认底色走 `--badge-h`（认不出来的应用由 sourceOf 散列出来一个色相）——
+   以前这里落 var(--color-text-3) 灰，用户的原话是「是不是可以有点颜色」。 */
+.badge{
+  width:16px; height:16px; border-radius:5px; flex:0 0 auto;
+  display:inline-grid; place-items:center;
+  font-family: var(--font-display); font-size:9.5px; font-weight:600; line-height:1;
+  color: #fff;
+  background: hsl(var(--badge-h, 220) 42% 46%);
+  transform: translateY(.5px);
+}
+.badge[data-brand="safari"]{ background: var(--brand-safari); }
+.badge[data-brand="chrome"]{ background: var(--brand-chrome); }
+.badge[data-brand="wechat"]{ background: var(--brand-wechat); }
+.badge[data-brand="notes"]{ background: var(--brand-notes); }
+.badge[data-brand="code"]{ background: var(--brand-code); }
+.badge[data-brand="terminal"]{
+  background: var(--brand-terminal);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size:9px;
+}
+/* 灵感不是「某个应用」，是你自己写下来的：用强调色的浅底，和采集来的区分开。
+   注意这条选择器挂在徽标**自己**身上，不再写成 `[data-kind="idea"] .badge`——
+   详情弹窗里没有 [data-kind] 祖先，那种写法在弹窗里会静默退回灰底。 */
+.badge[data-brand="idea"]{
+  background: var(--color-accent-soft); color: var(--color-on-accent-soft);
+}
+.src{ font-weight:500; white-space:nowrap; }
+/* 详情弹窗的「来源」行：徽标 + 名字，两者要垂直对齐。
+   徽标带 .5px 的位移（.badge 里那行 transform），所以必须走 flex 对齐，
+   用 inline 摆的话基线会差半个像素。 */
+.srcpair{ display:inline-flex; align-items:center; gap:7px; }
+/* 弹窗里的徽标比卡片上大一号：它是这一行的主角（「这条从哪来的」），
+   16px 在一行 12px 文字旁边太小，颜色也读不出来。 */
+.srcpair .badge{ width:19px; height:19px; border-radius:6px; font-size:11px; }
+.srcpair .badge[data-brand="terminal"]{ font-size:10px; }
+
+.card__text{
+  margin:0; flex:0 0 auto;
+  font-size: var(--size-text); line-height: var(--lh-text);
+  text-align: justify; text-justify: inter-ideograph;
+  hanging-punctuation: allow-end;
+  color: var(--color-text);
+  white-space: pre-wrap; overflow-wrap: anywhere;
+  display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden;
+  -webkit-line-clamp: var(--lines);
+}
+/* 默认四行。要不要分档，只改这三行（等比缩放，不破坏网格的整齐） */
+.card[data-size="s"] .card__text{ -webkit-line-clamp:4; }
+.card[data-size="m"] .card__text{ -webkit-line-clamp:4; }
+.card[data-size="l"] .card__text{ -webkit-line-clamp:5; }
+.card[data-clip="1"] .more{ display:inline-flex; }
+.more{
+  display:none; align-items:center; gap:2px;
+  font-size:11.5px; color: var(--color-accent); cursor:pointer;
+  background:transparent; border:0; padding:0;
+}
+.card[data-clip="1"]:hover .card__text{
+  -webkit-mask-image: linear-gradient(180deg, black 55%, transparent 100%);
+          mask-image: linear-gradient(180deg, black 55%, transparent 100%);
+}
+[data-kind="idea"] .card__text{ font-family: var(--font-display); font-weight:500; letter-spacing:.008em; }
+/* 终端 / 命令行片段：等宽 + 左对齐，别跟着正文一起两端对齐 */
+[data-kind="terminal"] .card__text{
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  font-size:12.8px; line-height:1.75; letter-spacing:0; text-align:start;
+}
+
+/* meta 行只服务列表视图；卡片视图走 head/foot，两套结构互不重叠 */
+.card__foot{
+  display:flex; align-items:flex-end; gap:6px;
+  padding-top: 10px; margin-top: 10px;
+  margin-bottom:-2px;              /* 内容簇贴顶，底部不留空洞 */
+  border-top: 1px solid var(--hairline);
+}
+.card__foot--bare{ border-top:0; padding-top:2px; margin-top:6px; }
+.tag{
+  cursor:pointer; border:0;
+  font-size:11px; line-height:16px; padding: 0 7px;
+  border-radius: 6px;
+  background: var(--color-accent-soft); color: var(--color-on-accent-soft);
+  transition: filter var(--dur);
+  /* 单个标签再长也不许把底栏撑开：截断，全名放 title 里。
+     标签名最多 12 字，7.5em 约 8 个汉字。min-width 保证被压缩时
+     至少还剩「一个字 + 省略号」，不至于压成一条竖线。 */
+  max-width: 7.5em; min-width: 2.4em;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  flex:0 1 auto;
+}
+.tag:hover{ filter: brightness(.97); }
+/* 不换行：换行会把右侧的「星标/复制/删除」顶到第二行去。
+   超出部分由 .tag 自己截断，并由 .tagmore 收口。 */
+.foot__tags{ display:flex; gap:6px; min-width:0; overflow:hidden; }
+.foot__tags:empty{ display:none; }
+/* 「+N」不能被压缩掉——它一消失，用户就以为标签只有露出来的那两个 */
+.tagmore{
+  flex:0 0 auto; align-self:center;
+  font-size:11px; line-height:16px; padding:0 6px; border-radius:6px;
+  color: var(--color-text-3);
+  background: color-mix(in srgb, var(--color-text) 7%, transparent);
+}
+/* 操作按钮不参与压缩、文字也不折行，否则窄卡片里「★ 星标」会断成两行 */
+.acts{
+  margin-left:auto; display:flex; gap:4px; opacity:0;
+  flex:0 0 auto; white-space:nowrap;
+  transition: opacity var(--dur);
+}
+.card:hover .acts, .card:focus-within .acts{ opacity:1; }
+.acts button{
+  cursor:pointer; border:1px solid var(--color-line);
+  background: var(--color-surface);
+  height:22px; padding:0 8px; font-size:11.5px; color:var(--color-text-2);
+  border-radius: 6px; white-space:nowrap;
+  transition: color var(--dur), border-color var(--dur);
+}
+.acts button:hover{ color: var(--color-accent); border-color: var(--accent-15); }
+
+/* ---------- 列表 = 阅读流（不是数据库表格） ----------
+   顺序反直觉但关键：句子本身是第一视觉元素，出处/时间降到下一行；
+   固定宽度的左右栏会让短标签竖着折行（旧版「书 」「古 文」就是这么塌的）。 */
+.grid.list{
+  display:block; max-width: 880px;
+  padding: 6px 0 12px;
+}
+.grid.list .card.is-selected{ background: color-mix(in srgb, var(--color-fill) 82%, transparent); }
+.grid.list .card{
+  position:relative; display:block; min-height:0; background:transparent;
+  border:0; border-radius: 10px;
+  padding: 14px 84px 13px 16px;      /* 右侧留出悬浮操作的空间，避免文字顶到边 */
+  margin: 0;
+  box-shadow:none; animation:none;
+  transition: background var(--dur) var(--ease);
+}
+.grid.list .card + .card{ border-top:0; }
+.grid.list .card::before{          /* 选中轨：只在 hover / 键盘选中时出现 */
+  content:""; position:absolute; left:0; top:8px; bottom:8px; width:2px;
+  border-radius:2px; background: var(--color-accent);
+  opacity:0; transform: scaleY(.4); transform-origin: top;
+  transition: opacity var(--dur), transform .24s var(--ease);
+}
+.grid.list .card:hover::before,
+.grid.list .card.is-selected::before{ opacity:1; transform:none; }
+.grid.list .card:hover, .grid.list .card:focus-visible{
+  background: color-mix(in srgb, var(--color-fill) 62%, transparent);
+  border-color: transparent; transform:none;
+}
+.grid.list .card::after{ display:none; }        /* 行本身整条可点，不需要热区补丁 */
+.grid.list .card__text{
+  -webkit-line-clamp:3; flex:none;
+  font-size:16px; line-height:1.85; letter-spacing:.004em;
+}
+.grid.list .card__text mark{ padding:0 1px; }
+.grid.list [data-kind="idea"] .card__text{ font-size:16.5px; font-weight:500; }
+.grid.list [data-kind="terminal"] .card__text{ font-size:13.5px; }
+.grid.list .card__meta{                          /* 出处 + 标签，一行读完 */
+  display:flex; align-items:center; gap:7px; flex-wrap:nowrap;
+  margin-top: 8px; padding-right: 2px;
+  font-size:11.5px; line-height:16px; color: var(--color-text-3);
+}
+.grid.list .card__meta .title{
+  min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.grid.list .card__meta .sep{ opacity:.5; }
+.grid.list .card__meta .tags{ display:inline-flex; gap:4px; min-width:0; overflow:hidden; }
+.grid.list .card__meta .count{ font-variant-numeric: tabular-nums; opacity:.8; }
+/* 字数前面那个分隔点：**只在它前面真有东西时才画**。
+   来源徽标撤出 meta 行之后，「灵感」这类没有出处标题的卡片会以字数打头，
+   固定加点的写法就会渲染出「· 12 字」——一个没有前文的顿号。 */
+.grid.list .card__meta .count:not(:first-child)::before{ content:"·"; margin-right:7px; opacity:.55; }
+.grid.list .card__meta{ display:flex; }
+.grid.list .card__foot{
+  position:absolute; right:12px; bottom:11px; margin:0; padding:2px;
+  background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+  border:1px solid var(--hairline); border-radius: 9px;
+  box-shadow: var(--shadow-soft); opacity:0; transform: translateX(4px);
+  transition: opacity var(--dur), transform var(--dur) var(--ease);
+  -webkit-backdrop-filter: var(--glass); backdrop-filter: var(--glass);
+}
+.grid.list .card:hover .card__foot,
+.grid.list .card:focus-within .card__foot{ opacity:1; transform:none; }
+.grid.list .acts{ margin:0; }
+.grid.list .more{ display:none !important; }
+.grid.list .empty{ padding:60px 0; }
+
+/* 分组：只在列表出现。「今天/昨天」用自然日，不按小时切 */
+.list-group{
+  display:flex; align-items:baseline; gap:8px;
+  padding: 20px 16px 6px; margin-top: 6px;
+  font-size:11.5px; letter-spacing:.08em; color: var(--color-text-3);
+  user-select:none;
+}
+.list-group .n{ font-variant-numeric: tabular-nums; opacity:.75; }
+.list-group::after{ content:""; flex:1 1 auto; height:1px; background: var(--hairline); transform: translateY(-3px); }
+.grid.list[data-group="0"] .list-group{ display:none; }
+
+/* 密度：紧凑 = 1 行预览，用来批量清理；舒适 = 3 行 */
+.grid.list[data-density="compact"]{ max-width: 900px; }
+.grid.list[data-density="compact"] .card{ padding: 9px 84px 9px 14px; }
+.grid.list[data-density="compact"] .card__text{ -webkit-line-clamp:1; font-size:14px; line-height:1.7; }
+.grid.list[data-density="compact"] .card__meta{ margin-top: 4px; }
+.grid.list[data-density="compact"] .list-group{ padding-top: 12px; }
+
+/* 窄窗：撤掉右侧悬浮操作的空间，改成常驻 */
+@media (max-width: 720px){
+  .grid.list .card{ padding-right: 16px; }
+  /* 右侧那 84px 的槽没了，星标角标就会压到正文上——给它留回来 */
+  .grid.list .card[data-star="1"]{ padding-right: 30px; }
+  .grid.list .card__foot{ position:static; opacity:1; transform:none; background:transparent;
+                          justify-content:flex-end; margin-top:8px; }
+}
+
+/* ---------- 专注视图：逐句读 ---------- */
+.grid.focus{ display:grid; place-items:center; min-height: calc(100vh - 190px); }
+.grid.focus .card{
+  width:min(660px,100%); min-height:0; border:0; background:transparent;
+  padding: 0 8px; animation:none;
+}
+.grid.focus .card:hover{ background:transparent; border-color:transparent; transform:none; }
+.grid.focus .card__text{
+  font-family: var(--font-display);
+  font-size:25px; line-height:2.05; -webkit-line-clamp:unset; text-align:start;
+  padding-left:18px; border-left:2px solid var(--accent-15);
+}
+/* 专注视图里卡片是居中的、上下都有富余，所以把星标放到卡片**上方**的右上角，
+   不去跟正文抢那条右边缘（专注态的卡片没有右边距，正文一直写到边上）。 */
+.grid.focus .card__star{ top:-22px; right:0; }
+.focus-nav{ display:none; justify-content:center; gap:8px; padding: 4px 0 16px; }
+.grid.focus ~ .focus-nav{ display:flex; }
+
+/* ---------- 顶栏上的弹层（主题、标签） ----------
+   位置由 JS 算（placePopover），CSS 里的 left/top 只是没算出来之前的兜底。
+   不写死 right 是因为锚点（主题按钮）不在窗口最右边——它右边还有「＋ 记录」，
+   写死 right 会让弹层对齐到窗口边，看起来跟按钮没关系。 */
+.popover{
+  position:fixed; top: calc(var(--h-topbar-total) + 6px); left:14px; right:auto; z-index:30;
+  width:296px; padding:10px;
+  border-radius: var(--r-pop);
+  background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+  -webkit-backdrop-filter: var(--glass-top); backdrop-filter: var(--glass-top);
+  border:1px solid var(--hairline);
+  box-shadow: var(--shadow-lift);
+  margin:0;
+}
+.popover::backdrop{ display:none; }
+.popover h4{
+  margin:2px 4px 8px; font-size:11px; font-weight:500;
+  letter-spacing:.08em; color: var(--color-text-3);
+}
+/* 标签列表：条目结构与主题项一致，共用 .theme 的样式 */
+#tagList{ max-height:min(340px, 46vh); overflow:auto; overscroll-behavior:contain; }
+.tagrow .n{ font-size:11px; color:var(--color-text-3); font-variant-numeric: tabular-nums; }
+.tagrow .theme__txt b{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tagrow--clear .theme__txt b{ color: var(--color-text-3); font-weight:400; }
+.pop-empty{ margin:6px 8px 4px; font-size:12px; color:var(--color-text-3); }
+.theme{
+  display:flex; align-items:center; gap:9px;
+  width:100%; text-align:left; cursor:pointer;
+  padding:7px 8px; border-radius:8px; border:1px solid transparent; background:transparent;
+  transition: background var(--dur);
+}
+.theme:hover{ background: var(--color-fill); }
+.theme[aria-pressed="true"]{ background: var(--color-accent-soft); border-color: var(--accent-15); }
+.theme .dots{ display:flex; gap:2px; }
+.theme .dots i{ width:8px; height:8px; border-radius:50%; box-shadow:0 0 0 1px color-mix(in srgb, var(--color-text) 10%, transparent) inset; }
+/* 主题多了以后弹层要能滚；分组小标题用 hairline 收尾，别做成 web 下拉的隔线 */
+#themeList{ max-height:min(340px, 46vh); overflow:auto; overscroll-behavior:contain; }
+.pop-sec{
+  display:flex; align-items:center; gap:8px; margin:9px 8px 4px;
+  font-size:10.5px; letter-spacing:.1em; color: var(--color-text-3);
+}
+.pop-sec::after{ content:''; flex:1 1 auto; height:1px; background: var(--hairline); }
+.pop-sec:first-child{ margin-top:2px; }
+.theme__txt{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:1px; }
+.theme b{ font-size:12.5px; font-weight:500; }
+.theme span{ font-size:11px; color: var(--color-text-3); }
+.theme .check{ width:11px; font-size:11px; color: var(--color-accent); opacity:0; }
+.theme[aria-pressed="true"] .check{ opacity:1; }
+
+/* ---------- 弹窗（原生 <dialog>，macOS sheet 的圆角与遮罩） ---------- */
+/* 卡片外观抽成一处，确认弹窗和详情弹窗的内层都用它——两处各写一遍迟早会漂。 */
+.confirm, .sheet__panel{
+  padding:0; border:1px solid var(--hairline);
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--color-surface); color: var(--color-text);
+  box-shadow: var(--shadow-lift);
+}
+/* 详情弹窗的 dialog 本身是**透明的定位容器**，没有边框、背景和圆角：
+   关闭按钮要落在卡片外，而 dialog 的 UA 样式带 overflow:auto 会把它裁掉。
+   把外观、滚动和圆角裁剪都交给 .sheet__panel，dialog 就能放心 overflow:visible。 */
+.sheet{
+  width:min(580px, 92vw);
+  padding:0; border:0; background:transparent; box-shadow:none;
+  overflow:visible;
+}
+.sheet__panel{
+  position:relative;
+  /* 高度上限留在内层：dialog 已经 overflow:visible，再让它自己截断的话
+     长内容会直接溢出到屏幕外（底部按钮就点不到了）。这里滚动，
+     顺带用 overflow 非 visible 触发圆角裁剪。 */
+  max-height: calc(100vh - 120px);
+  overflow-y:auto; overflow-x:hidden;
+}
+.confirm{ width:min(360px, 88vw); }
+.sheet::backdrop, .confirm::backdrop{
+  background: var(--scrim);
+  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+}
+.sheet__text{
+  font-family: var(--font-display);
+  font-size:16px; line-height:2; margin:0;
+  white-space:pre-wrap; text-align:justify;
+}
+.sheet__body{ padding:22px 24px 4px; }
+.sheet__meta{
+  display:grid; grid-template-columns:56px 1fr; gap:7px 12px;
+  margin:20px 0 0; padding:14px 0 0; border-top:1px solid var(--hairline);
+  font-size:12px;
+}
+.sheet__meta dt{ color: var(--color-text-3); }
+.sheet__meta dd{ margin:0; color: var(--color-text-2); word-break:break-all; }
+.sheet__meta a{ color: var(--color-accent); text-decoration:none; }
+.sheet__foot{
+  display:flex; gap:8px; align-items:center;
+  padding:16px 24px; margin-top:18px;
+  background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+  border-top:1px solid var(--hairline);
+}
+/* 关闭按钮在卡片**外面**的右上角（负的 top 让它整体悬在卡片上沿之上）。
+   这样它不会挤占正文的排版空间，视觉上也更像浮层自己的按钮。
+   right:0 是贴着卡片右沿对齐——比 right:-26px 那种「飘在右边」稳，
+   因为卡片宽度随视口变（min(580px, 92vw)），飘出去的按钮在窄屏上会顶到边缘。 */
+.sheet__close{
+  position:absolute; top:-34px; right:0;
+  width:26px; height:26px; padding:0; border:0; border-radius:50%;
+  /* 叉的居中靠 grid，不靠 line-height：<button> 有 UA 默认 padding，
+     再叠上字体的行框度量，两者一起把字符顶偏——原来就是这么偏的。 */
+  display:grid; place-items:center;
+  cursor:pointer; color: var(--color-text-3); background: transparent;
+  transition: background var(--dur), color var(--dur);
+}
+.sheet__close svg{ display:block; }   /* 行内元素底部有基线空隙，会再把叉挤偏一点 */
+/* 悬在卡片外时按钮底下是半透明遮罩，用 --color-fill 那种几乎看不见，
+   所以 hover 给一层实底（按文字色混出表面色，亮暗色都能用）。 */
+.sheet__close:hover{
+  background: color-mix(in srgb, var(--color-text) 12%, var(--color-surface));
+  color: var(--color-text);
+}
+.sheet__close:active{
+  background: color-mix(in srgb, var(--color-text) 20%, var(--color-surface));
+}
+
+/* ---------- 确认弹窗 ---------- */
+.confirm__title{ margin:0; padding:20px 22px 0; font-size:13.5px; font-weight:600; }
+.confirm__text{
+  margin:7px 0 0; padding:0 22px;
+  font-size:12.5px; line-height:1.75; color: var(--color-text-2);
+  word-break:break-word;
+}
+.confirm__text b{ font-weight:500; color: var(--color-text); }
+.confirm__foot{ display:flex; gap:8px; justify-content:flex-end; padding:18px 22px 16px; }
+
+/* 删除按钮：不新增主题 token（9 套主题各加一个成本太高），
+   改成把固定红和当前主题的文字色混一点——浅色主题下文字色是深色、
+   混出来偏沉，深色主题下文字色是浅色、混出来偏亮，两个方向都对。 */
+.btn--danger{
+  color: color-mix(in srgb, #E5484D 72%, var(--color-text));
+  border-color: color-mix(in srgb, currentColor 26%, transparent);
+}
+.btn--danger:hover{ background: color-mix(in srgb, currentColor 9%, transparent); }
+
+/* ---------- 新建记录表单里的单行输入 ---------- */
+.field{ margin-top:14px; }
+.field__lbl{
+  display:block; margin:0 0 6px; font-size:11px; font-weight:500;
+  letter-spacing:.08em; color: var(--color-text-3);
+}
+.field input{
+  width:100%; height:30px; padding:0 10px;
+  font:inherit; font-size:12.5px; color: var(--color-text);
+  background: color-mix(in srgb, var(--color-fill) 55%, transparent);
+  border:1px solid var(--hairline); border-radius: var(--r-ctrl);
+  transition: border-color var(--dur), background var(--dur), box-shadow var(--dur);
+}
+.field input:focus{
+  outline:none; background: var(--color-surface);
+  border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+  box-shadow: 0 0 0 3px var(--accent-15);
+}
+.field input::placeholder{ color: var(--color-text-3); }
+
+/* 编辑态：正文直接可改。用虚线 hairline 而不是实线蓝框——
+   macOS 的「就地编辑」（访达重命名、备忘录）都是这种安静的提示，不是 web 表单。 */
+.edit{
+  width:100%; font: inherit; color: var(--color-text);
+  font-size:16px; line-height:2; letter-spacing: var(--text-tracking);
+  background: color-mix(in srgb, var(--color-fill) 55%, transparent);
+  border:1px dashed var(--hairline); border-radius: calc(var(--radius) - 4px);
+  padding:12px 14px; margin:0; resize:none; overflow:auto;
+  transition: border-color var(--dur), background var(--dur), box-shadow var(--dur);
+}
+.edit:focus{
+  outline:none; border-style:solid;
+  border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+  background: var(--color-surface); box-shadow: 0 0 0 3px var(--accent-15);
+}
+.edit__foot{
+  display:flex; align-items:center; gap:10px; margin:8px 2px 0;
+  font-size:11.5px; color: var(--color-text-3);
+}
+.edit__foot .tip{ margin-left:auto; }
+.edit__foot code{ font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size:10.5px; }
+.tags__edit{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:2px; }
+.tagchip{
+  display:inline-flex; align-items:center; gap:6px;
+  height:22px; padding:0 6px 0 9px; border-radius:999px;
+  background: var(--color-accent-soft); color: var(--color-on-accent-soft);
+  border:1px solid var(--accent-15); font-size:11.5px;
+}
+.tagchip button{
+  border:0; background:transparent; cursor:pointer; color: inherit;
+  font-size:12px; line-height:1; padding:0; width:14px; height:14px; border-radius:50%;
+  opacity:.62; transition: opacity var(--dur), background var(--dur);
+}
+.tagchip button:hover{ opacity:1; background: color-mix(in srgb, var(--color-on-accent-soft) 14%, transparent); }
+.tagadd{
+  width:88px; height:22px; border-radius:999px; padding:0 9px;
+  border:1px dashed var(--hairline); background:transparent; cursor:text;
+  color: var(--color-text-2); font-size:11.5px; font-family:inherit;
+  transition: width var(--dur), border-color var(--dur), background var(--dur);
+}
+.tagadd:focus{ outline:none; width:132px; border-style:solid; background: var(--color-surface); }
+.tagadd::placeholder{ color: var(--color-text-3); }
+.sheet__lbl{
+  margin:18px 0 6px; font-size:11px; font-weight:500;
+  letter-spacing:.08em; color: var(--color-text-3);
+}
+
+/* ---------- Toast ---------- */
+.toast{
+  position:fixed; left:50%; bottom:22px; transform:translate(-50%,8px);
+  display:flex; align-items:center; gap:10px;
+  padding:7px 8px 7px 14px; border-radius:100px;
+  background: color-mix(in srgb, var(--color-text) 92%, transparent);
+  color: var(--color-surface); font-size:12.5px;
+  box-shadow: var(--shadow-lift);
+  opacity:0; pointer-events:none; transition:opacity var(--dur), transform var(--dur) var(--ease);
+  z-index:40;
+}
+.toast[data-open]{ opacity:1; transform:translate(-50%,0); pointer-events:auto; }
+.toast button{
+  cursor:pointer; border:0; border-radius:100px; padding:3px 10px; font-size:12px;
+  background: color-mix(in srgb, var(--color-surface) 22%, transparent); color:inherit;
+}
+.toast button:hover{ background: color-mix(in srgb, var(--color-surface) 34%, transparent); }
+
+/* ---------- 空态 ---------- */
+/* 空状态：文案在内容区里水平垂直居中。
+   不主动撑高的话它只有一行文字那么高，垂直居中就无从谈起。
+
+   撑多高原先写的是 `100vh - 顶栏 - 筛选栏 - 常数`，那个常数得同时盯着筛选栏
+   高度和 .content 的上下内边距，改一处忘一处就会偏——实测偏上 18px。
+   改成 `min-height:100%`：百分比是相对 .content 的内容盒算的，而 .content
+   是 flex 项、高度确定，所以这个百分比有确定的值，也不含任何需要同步的常数。
+
+   还剩一处：.content 的内边距上下不对称（4 / 26），26px 是给「滚到底」留的
+   呼吸位。只给 100% 仍会偏上 11px，而空状态压根没有滚动，把那 26px 收平即可。 */
+.content:has(> .grid.is-empty){ padding-bottom: 4px; }
+.grid.is-empty{
+  display:flex; align-items:center; justify-content:center;
+  min-height: 100%;
+}
+.empty{
+  text-align:center; color:var(--color-text-3); font-size:13px; line-height:2;
+  max-width: 32em;
+}
+
+/* ---------- 主题切换只过渡颜色，不过渡布局 ---------- */
+.theme-anim .panel, .theme-anim .card, .theme-anim .btn, .theme-anim .chip, .theme-anim .seg{
+  transition: background-color .24s, color .24s, border-color .24s;
+}
+
+/* ---------- 滚动条：macOS overlay 的细与淡 ---------- */
+::-webkit-scrollbar{ width:11px; height:11px; }
+::-webkit-scrollbar-thumb{ background: color-mix(in srgb, var(--color-text-3) 34%, transparent);
+  border-radius:6px; border:3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover{ background: color-mix(in srgb, var(--color-text-3) 52%, transparent); background-clip: padding-box; }
+::-webkit-scrollbar-track{ background:transparent; }
+
+@media (max-width:760px){
+  .topbar{ padding-left:11px; padding-right:11px; gap:7px; }
+  /* `flex-basis: 0` + `min-width` 一起才管用：
+     basis 给 0 它才会在空间不足时真的让位，min-width 保证不让到没法输入。 */
+  .search{ width:auto; flex:1 1 0; min-width:96px; max-width:200px; }
+  .seg button{ padding:3px 8px; }
+}
+@media (prefers-reduced-motion: reduce){
+  *{ animation:none !important; transition:none !important; }
+}
+</style>
+</head>
+<body data-page-node-id="tg8CjrJcUPSHNWSCqKESHS">
+<div class="panel" data-page-node-id="yMU8VJ70YDQP7D3B5iHJn1">
+
+  <header class="topbar" data-page-node-id="qYwnAOGaAavegzVjakdLwO">
+    <div class="brand" data-page-node-id="Ea0W05Z0HD308bqdPEiuZe">
+      <span class="brand__mark" data-page-node-id="lJfOMSiHWUZe3a9nJ6ZPW6">拾</span>
+    </div>
+
+    <label class="search" data-page-node-id="0TCEL633S5MKw2gFCjQfLT">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" data-page-node-id="51RK23nsnFkLxhAb9eJ7uW">
+        <circle cx="6.8" cy="6.8" r="4.4" data-page-node-id="dO4uRPDuum986mf4lA8tQ4"/><path d="M10.2 10.2 13.6 13.6" stroke-linecap="round" data-page-node-id="FSKESKE8PyiiANiFs7n4EJ"/>
+      </svg>
+      <input id="q" type="search" placeholder="搜索" spellcheck="false" autocomplete="off" data-page-node-id="gctEwc6UWEaKlf3fEPpoBN">
+    </label>
+
+    <div class="seg" role="group" aria-label="视图" data-page-node-id="TPPHkkjGYC89Fhbxwh8Kdz">
+      <button data-view="grid"  aria-pressed="true" data-page-node-id="HrCHTTQOY5QAbsyRWOtcvH">卡片</button>
+      <button data-view="list"  aria-pressed="false" data-page-node-id="2rD8LTCWkUWNJnrKLP3lFY">列表</button>
+      <button data-view="focus" aria-pressed="false" data-page-node-id="AUoOjJwAh4lzlDFdlj8AbG">专注</button>
+    </div>
+
+    <span class="spacer" data-page-node-id="nho8WB0MCAiR7vcR5dlE7n"></span>
+
+    <button class="btn btn--icon" id="settingsBtn" title="快捷键设置" aria-label="快捷键设置" data-page-node-id="set1BtnXkQ2pVhWn7zMcE">
+      <!-- 画的是「滑杆」而不是齿轮：齿轮在 15px 下缩成一圈辐条，看着像太阳；
+           而它右边紧挨着的就是主题按钮，很容易被误读成亮度调节。
+           滑杆是通用的「偏好设置」符号，两行也正好对应窗口里的两个快捷键。 -->
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true" data-page-node-id="set2SvgYbN8rLdTv3mKwA">
+        <path d="M2.4 5.4h11.2M2.4 10.6h11.2" data-page-node-id="set4SpokesWm7kPb2sQd4tE"/>
+        <circle cx="6" cy="5.4" r="1.9" fill="currentColor" stroke="none" data-page-node-id="set3CircleHq5tJcXp9nVfR"/>
+        <circle cx="10.2" cy="10.6" r="1.9" fill="currentColor" stroke="none" data-page-node-id="set5KnobAq3wZt8mNv2bFd"/>
+      </svg>
+    </button>
+    <button class="btn" id="themeBtn" aria-haspopup="dialog" aria-expanded="false" title="主题（t 循环，1–9 直达）" data-page-node-id="kMPiRg9HrdHCvAAxsnVfmD">
+      <span class="swatch" id="themeSwatch" data-page-node-id="fHZgXBP1yAid2QaFk0VqRx"></span><span id="themeName" data-page-node-id="YUF0qBIw0VhS1zhgB5HU98">自动</span>
+    </button>
+    <button class="btn" id="addBtn" title="记录此刻的一句话" data-page-node-id="8ON3FaI9dzdgYP2ioQ2Agg">＋ 记录</button>
+  </header>
+
+  <div class="filters" id="filters" data-page-node-id="pUB1yvDUwANRTIbVUimO4q">
+    <button class="chip" data-filter="all"  aria-pressed="true" data-page-node-id="iMrvFgXza1gK5RZfuWk6EW">全部 <span class="n" data-page-node-id="Is7zQZgj8CF2gct9x3AW6p"></span></button>
+    <button class="chip" data-filter="star" aria-pressed="false" data-page-node-id="UmIQBgeD1eMSvEHZuIvWbr">星标 <span class="n" data-page-node-id="BWDwZe0nz3JNS5XZcRjnEX"></span></button>
+    <button class="chip" data-filter="idea" aria-pressed="false" data-page-node-id="yDESW262LqDdMlfVenkEEk">灵感 <span class="n" data-page-node-id="4ax3xaNcwSZ27Sm22tyU7g"></span></button>
+    <button class="chip" data-filter="page" aria-pressed="false" data-page-node-id="y1Ee6NtEol1XrbEGji1VYR">网页 <span class="n" data-page-node-id="rBWMsDyXZsiZhiVsfqQI4D"></span></button>
+    <button class="chip" data-filter="term" aria-pressed="false" data-page-node-id="oTU2DWFds1Efp3RXbNPvzZ">终端 <span class="n" data-page-node-id="XQ6KkWOIQzgZlkYxpxNMo9"></span></button>
+    <button class="chip" id="tagBtn" aria-haspopup="dialog" aria-expanded="false" hidden
+            title="按标签筛选" data-page-node-id="oTU2DWFds1Efp3RXbNPvzY"><span id="tagBtnLabel">标签</span> <span class="n" id="tagBtnN" data-page-node-id="XQ6KkWOIQzgZlkYxpxNMo8"></span></button>
+    <span class="tools" id="tools" hidden data-page-node-id="vNBlQGxb0R7I1FDpW1UGgG">
+      <button class="tbtn" data-tool="group" aria-pressed="true" data-page-node-id="TYm5hUoWIEYzOeQo0ISQ9t">按天分组</button>
+      <span class="tsep" data-page-node-id="NjY1otMllzeAtOdCwMq0F1"></span>
+      <button class="tbtn" data-tool="density" aria-pressed="false" data-page-node-id="938xJ0lDxQcwZTmRlLOtGd">紧凑</button>
+    </span>
+    <span class="filters__hint" id="hint" data-page-node-id="tlJeAvBlgIjGrGBkJuSbEv"></span>
+  </div>
+
+  <main class="content" data-page-node-id="lR6RBY2utuscclSvJED0WS">
+    <div class="grid" id="grid" data-page-node-id="Ao6Vz7uMEZAD7TkMYqdZpG"></div>
+    <div class="focus-nav" data-page-node-id="KjJqUJrGNOXXngD1JKAjaM">
+      <button class="btn" data-nav="-1" data-page-node-id="sdMmsiC6m9ZifzD88DKZsC">← 上一句</button>
+      <button class="btn" data-nav="1" data-page-node-id="f4JcFWn47QsfgOn0L2Bh5U">下一句 →</button>
+    </div>
+  </main>
+</div>
+
+<!-- 主题选择器 -->
+<dialog class="popover" id="themePop" data-page-node-id="5omHKjVnmW05iEiub6vuDB">
+  <h4 data-page-node-id="qM2TioC2AA2owrjkjJhzhu">主题</h4>
+  <div id="themeList" data-page-node-id="QAYsuGhHBI4jzi4ZxHo0ho"></div>
+</dialog>
+
+<!-- 标签筛选。列表按出现次数排序，点一个只留带该标签的句子。
+     为什么要有它：卡片上的标签点击是**全文搜索**（会连带匹配到正文里出现该词的句子），
+     想要「只看着这个标签的东西」时那个入口是不够准的。 -->
+<dialog class="popover" id="tagPop" data-page-node-id="5omHKjVnmW05iEiub6vuDC">
+  <h4 data-page-node-id="qM2TioC2AA2owrjkjJhzhu2">按标签筛选</h4>
+  <div id="tagList" data-page-node-id="QAYsuGhHBI4jzi4ZxHo0ho2"></div>
+</dialog>
+
+<!-- 详情 -->
+<!-- dialog 只当「定位容器」，卡片外观在 .sheet__panel 上。
+     为什么要拆：关闭按钮要放在卡片**外面**的右上角，而 <dialog> 的 UA 样式
+     带 overflow:auto，会把溢出的按钮直接裁掉。把外观挪进内层之后，
+     dialog 就能 overflow:visible，而滚动与圆角裁剪交给 .sheet__panel。
+     按钮挂在 dialog 下、而不是 panel 里，是因为 panel 需要 overflow 做滚动，
+     挂进去的话按钮会被它一起裁掉。 -->
+<dialog class="sheet" id="sheet" data-page-node-id="z6Achx8EMoMfIrAKkOXP48">
+  <!-- 关闭按钮的叉用 SVG 画，不用「✕」字符：
+       字符的居中取决于字体度量，按钮上还有 UA 默认 padding，
+       两者一叠加就明显偏；SVG 是几何图形，居中不依赖字体。 -->
+  <button class="sheet__close" id="sheetClose" aria-label="关闭" title="关闭（Esc）" data-page-node-id="hiScqnZPwwAGihdRHbv1bk">
+    <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true" data-page-node-id="hiScqnZPwwAGihdRHbv1bk2">
+      <path d="M2.6 2.6 9.4 9.4M9.4 2.6 2.6 9.4" fill="none" stroke="currentColor"
+            stroke-width="1.5" stroke-linecap="round" data-page-node-id="hiScqnZPwwAGihdRHbv1bk3"/>
+    </svg>
+  </button>
+  <div class="sheet__panel" data-page-node-id="z6Achx8EMoMfIrAKkOXP49">
+    <div class="sheet__body" id="sheetBody" data-page-node-id="B29ZfSwizQgr0YeWrhMoKd"></div>
+    <div class="sheet__foot" id="sheetFoot" data-page-node-id="VK3pASnmUpLpdVaVbnlyoF"></div>
+  </div>
+</dialog>
+
+<!-- 确认。只用在不可逆的操作上（目前是删除）。
+     不用 window.confirm：WKWebView 默认不实现它，会静默返回 false——
+     那样「点了删除没反应」比没有确认还糟。 -->
+<dialog class="confirm" id="confirm" data-page-node-id="CfRm0QKq1nLZt3aXb8dWpA">
+  <p class="confirm__title" id="confirmTitle" data-page-node-id="CfRm0QKq1nLZt3aXb8dWpB">确认删除？</p>
+  <p class="confirm__text" id="confirmText" data-page-node-id="CfRm0QKq1nLZt3aXb8dWpC"></p>
+  <div class="confirm__foot" data-page-node-id="CfRm0QKq1nLZt3aXb8dWpD">
+    <button class="btn" id="confirmCancel" data-page-node-id="CfRm0QKq1nLZt3aXb8dWpE">取消</button>
+    <button class="btn btn--danger" id="confirmOk" data-page-node-id="CfRm0QKq1nLZt3aXb8dWpF">删除</button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" data-page-node-id="rnPiZcQnbEvOGxkQnDtx8p"><span id="toastMsg" data-page-node-id="3BJBoGiGxJxfvaHxbo3xWL"></span><button id="toastAct" hidden data-page-node-id="OTNMm0VWRs96zkDawoo4Ek">撤销</button></div>
+
+<script>
+/* ============================ 主题元数据（与 tokens 同源） ============================ */
+/* scheme 字段只为选择器分组用；真正生效的是 tokens.css 里同名的 :root[data-theme=…] 块，
+   两处必须同源 —— gen_tokens.py 的 THEMES 才是唯一数据源，改主题去那儿改。 */
+const AUTO = { key:'auto', scheme:'auto', name:'自动', tag:'跟随系统浅色 / 深色', dots:['#FFFFFF','#262C34','#2F6FE0'] };
+/* THEMES 只放「真主题」：数字键 1–9 直接按下标取，自动另走 0。
+   把自动塞进数组第 0 位会让 1 变成晴空、9 少一个，两边错位过一次。 */
+const THEMES = [
+  { key:'sky',      scheme:'light', name:'晴空', tag:'默认 · 冷白干净',       dots:['#F3F5F8','#FFFFFF','#2F6FE0'] },
+  { key:'moss',     scheme:'light', name:'苔绿', tag:'日间护眼 · 草木淡绿',    dots:['#ECF1EA','#FBFDF9','#3A7D54'] },
+  { key:'mist',     scheme:'light', name:'雾蓝', tag:'冷静 · 适合长句',        dots:['#E9EFF5','#FBFCFE','#3A7396'] },
+  { key:'paper',    scheme:'light', name:'纸间', tag:'纸书质感 · 宋体暖米',    dots:['#F5F2EC','#FCFAF6','#97682A'] },
+  { key:'denim',    scheme:'light', name:'丹宁', tag:'硬边 · 行距紧 · 效率向', dots:['#E7ECF4','#FAFCFF','#33517E'] },
+  { key:'night',    scheme:'dark', name:'夜览', tag:'深色 · 中性不偏色',       dots:['#1F242B','#262C34','#6BA9F5'] },
+  { key:'lamp',     scheme:'dark', name:'灯下', tag:'深夜暖光 · 低蓝光',        dots:['#221B14','#291F16','#E8B25E'] },
+  { key:'graphite', scheme:'dark', name:'石墨', tag:'深色 · 冷灰蓝不刺眼',      dots:['#232629','#292D31','#7FB8E8'] },
+  { key:'sepia',    scheme:'dark', name:'沉褐', tag:'深色 · 纸书夜读暖褐',      dots:['#271F18','#2E251C','#D9A56A'] },
+  { key:'ink',      scheme:'dark', name:'水墨', tag:'深色 · 电子纸 单色',      dots:['#212223','#262728','#D6D5D1'] },
+];
+const KIND = { page:'网页', note:'笔记', chat:'即时', terminal:'终端', idea:'灵感' };
+
+/* 来源识别表：**按名字里的关键词认，不能按精确的键认。**
+ *
+ * source_app 存的是 `NSRunningApplication.localizedName`（见 Capture.swift），
+ * 实测是「Google Chrome」「微信」「终端」「备忘录」「Xcode」。
+ * 面板早先写的是 `{ Chrome:'Chrome', Notes:'备忘录', Terminal:'终端', Code:'Xcode' }`
+ * 这种精确键 —— 于是**除了 Safari 之外一个都对不上**，
+ * 徽标全落到灰色兜底（用户的原话：「来源 icon 是不是可以有点颜色」）。
+ * 查了一下真实库：9 条 Chrome、1 条微信，两条都是灰的。
+ *
+ * 这和 Store.swift 里按 `LIKE '%chrome%'` 认浏览器 / 终端是同一件事，
+ * 两边口径必须一致 —— 那边是「什么类型」，这边是「画什么徽标」。
+ */
+const SOURCES = [
+  { names:['safari'],                                 badge:'S',  brand:'safari'   },
+  { names:['chrome','chromium'],                      badge:'C',  brand:'chrome'   },
+  { names:['微信','wechat'],                          badge:'微', brand:'wechat'   },
+  { names:['备忘录','notes'],                         badge:'记', brand:'notes'    },
+  { names:['终端','terminal','iterm','warp','kitty'], badge:'$_', brand:'terminal' },
+  { names:['xcode'],                                  badge:'X',  brand:'code'     },
+];
+
+/* 认不出来的应用：按名字散列出一个稳定色相。
+ * 原先落 `var(--color-text-3)`（灰）—— 灰色等于没信息。
+ * 散列色虽然不是品牌色，但**同一个应用每次都是同一个色**，认得出来。
+ * 色相写进 `--badge-h`，具体的长相（饱和度/明度）留在 CSS 里。 */
+function hueOf(name){
+  let h = 7;
+  for (const ch of String(name)) h = (h * 31 + ch.codePointAt(0)) % 360;
+  return h;
+}
+
+/* ============================ 数据 ============================ */
+/* 真实运行时由 Shiju.hydrate(rows) 从 SQLite 注入；这里的样例只为看效果 */
+const SEED = [
+  { id:'a01', text:'我们最终拥有的，只有我们记住的。', app:'Safari', title:'《永恒之间》', kind:'page', at:'刚刚', ts:0, tags:['书'] },
+  { id:'a02', text:'人间送小温。', app:'Safari', title:'《受戒》· 汪曾祺', kind:'page', at:'12 分钟前', ts:12*60e3, starred:true, tags:['句子'] },
+  { id:'a03', text:'我认为，人生最有味的事，是自己能把自己想做的事做成。', app:'WeChat', title:'黄金时代', kind:'chat', at:'40 分钟前', ts:40*60e3, tags:['王小波'] },
+  { id:'a04', text:'git log --author="me" --since=1.week\n  → 12 commits, 4 files, +1180 −92', app:'Terminal', kind:'terminal', at:'1 小时前', ts:1*3600e3 },
+  { id:'a05', text:'死生亦大矣。', app:'Notes', title:'《兰亭集序》', kind:'note', at:'2 小时前', ts:2*3600e3, tags:['古文'] },
+  { id:'a06', text:'如果我知道我将死去，我会更仔细地观看世界。', app:'Notes', kind:'idea', at:'3 小时前', ts:3*3600e3, tags:['灵感'] },
+  { id:'a07', text:'生活不能等待别人来安排，要自己去争取和奋斗；不论其结果是喜是悲，但可以慰藉的是，你总不枉在这世界上活了一场。', app:'WeChat', title:'《平凡的世界》', kind:'chat', at:'5 小时前', ts:5*3600e3, tags:['路遥'] },
+  { id:'a08', text:'碎砖烂瓦里，也有值得收藏的东西。拾起来，就是自己的。', app:'Notes', kind:'idea', at:'昨天 22:14', ts:26*3600e3, starred:true, tags:['灵感','产品'] },
+  { id:'a09', text:'我们一切所有，终会失去；唯有所爱的文字，可以随身携带。', app:'Notes', title:'随手记', kind:'note', at:'昨天 21:02', ts:27*3600e3 },
+  { id:'a10', text:'不要温和地走进那个良夜。', app:'Safari', title:'Do Not Go Gentle into That Good Night', kind:'page', at:'昨天 18:47', ts:29*3600e3, tags:['狄兰·托马斯'] },
+  { id:'a11', text:'人的一切痛苦，本质上都是对自己无能的愤怒。', app:'WeChat', title:'微信读书', kind:'chat', at:'2 天前', ts:2*86400e3, tags:['王小波'] },
+  { id:'a12', text:'被误解是表达者的宿命。', app:'Safari', kind:'page', at:'2 天前', ts:2*86400e3+3600e3 },
+  { id:'a13', text:'真正的发现之旅，不在于寻找新的风景，而在于拥有新的眼光。', app:'Safari', title:'Prater, Proust', kind:'page', at:'3 天前', ts:3*86400e3, starred:true, tags:['普鲁斯特'] },
+  { id:'a14', text:'删除是廉价的，遗忘才是最终的自由。', app:'Terminal', kind:'idea', at:'3 天前', ts:3*86400e3+7200e3 },
+];
+
+/* 沙箱化预览环境里 localStorage 可能抛异常，收主题偏好不能把整个面板带崩 */
+const store = {
+  get(k){ try { return localStorage.getItem(k || 'shiju.theme'); } catch (_){ return null; } },
+  set(v, k){ try { localStorage.setItem(k || 'shiju.theme', v); } catch (_){} },
+};
+
+/* ============================ 状态 ============================ */
+const state = {
+  data: SEED.slice(),   // 浏览器预览时下面 applyEdits 会把 localStorage 里的改动盖回来
+  view: 'grid',
+  filter: 'all',
+  tagFilter: null,      // 精确标签筛选（null = 不筛）。与 q 的区别：q 是全文模糊匹配
+  q: '',
+  active: 0,
+  theme: store.get() || 'auto',
+  density: store.get('shiju.density') || 'cozy',   // cozy | compact
+  group: store.get('shiju.group') !== '0',
+  trash: null,
+  touched: false,          // 键盘/点击选过之后才画「选中轨」，避免一进列表首行就带蓝条
+};
+
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const grid = $('#grid');
+
+/* ============================ 原生桥 ============================ */
+/* 返回是否真的发出去了。脱离原生壳（浏览器里调样式）时返回 false，
+   调用方据此决定要不要退化成纯本地渲染。 */
+function bridge(type, extra){
+  const msg = Object.assign({ type }, extra || {});
+  try {
+    if (!window.webkit || !window.webkit.messageHandlers.action) return false;
+    window.webkit.messageHandlers.action.postMessage(msg);
+    return true;
+  }
+  catch (_){ return false; }
+}
+window.onShijuAction = bridge;
+
+/* ============================ 工具 ============================ */
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function hl(s){
+  const t = esc(s);
+  if (!state.q) return t;
+  const q = esc(state.q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return t.replace(new RegExp(q, 'gi'), m => `<mark style="background:var(--accent-15);color:inherit;border-radius:3px">${m}</mark>`);
+}
+/* 三档高度：短句不空、长句整齐，避免瀑布流那种「AI 生成感」 */
+const sizeOf = t => { const n = String(t||'').replace(/\n/g,'').length; return n <= 16 ? 's' : n <= 58 ? 'm' : 'l'; };
+const find = id => state.data.find(x => x.id === id);
+/* 编辑写 localStorage 只是为了让浏览器预览里刷新不丢；真机上以原生 SQLite 为准。
+   注意声明次序：state 初始化就会调 applyEdits → edits()，EDIT_KEY 必须在那之前。 */
+/* 编辑写 localStorage 只是为了让浏览器预览里刷新不丢；真机上以原生 SQLite 为准 */
+const EDIT_KEY = 'shiju.edits';
+function edits(){ try { return JSON.parse(localStorage.getItem(EDIT_KEY) || '{}') || {}; } catch (_){ return {}; } }
+function persistEdit(id){
+  try {
+    const m = edits(), x = find(id);
+    if (x) m[id] = { text: x.text, tags: x.tags || [] }; else delete m[id];
+    localStorage.setItem(EDIT_KEY, JSON.stringify(m));
+  } catch (_){}
+}
+/* 编辑覆盖：浏览器预览里靠 localStorage 撑住，真机由 SQLite 提供同一份内容 */
+function applyEdits(rows){
+  const m = edits();
+  if (!m || !Object.keys(m).length) return rows.slice();
+  return rows.map(r => m[r.id] ? Object.assign({}, r, m[r.id]) : r);
+}
+
+function visible(){
+  return state.data.filter(x => {
+    if (state.filter === 'star' && !x.starred) return false;
+    if (state.filter === 'idea' && x.kind !== 'idea') return false;
+    if (state.filter === 'page' && x.kind !== 'page') return false;
+    if (state.filter === 'term' && x.kind !== 'terminal') return false;
+    // 标签筛选是精确匹配（必须真带这个标签），和下面 q 的全文模糊匹配是两件事
+    if (state.tagFilter && !(x.tags||[]).includes(state.tagFilter)) return false;
+    if (state.q){
+      const hay = [x.text, x.title||'', x.app||'', (x.tags||[]).join(' ')].join(' ').toLowerCase();
+      if (!hay.includes(state.q.toLowerCase())) return false;
+    }
+    return true;
+  });
+}
+
+/* ============================ 渲染 ============================ */
+/* 来源 = 应用名 + 16px 徽标。抽成函数是因为它有两个消费方：
+     ① 详情弹窗的「来源」行（徽标 + 名字要一起出现）；
+     ② 卡片渲染里「别把来源名再当标签显示一遍」的过滤。
+   卡片本身已经不显示来源了（用户要求：来源、图标、时间都收进弹窗），
+   但徽标映射表必须只有一份——两处各写一份，改一处忘一处。
+
+   名字用**原始的应用名**（「Google Chrome」而不是「Chrome」）：那是事实，
+   而且认不出来的应用也能原样显示。徽标和颜色才走关键词匹配。 */
+function sourceOf(x){
+  const raw = (x.app || '').trim();
+  const name = x.kind === 'idea' ? '灵感' : (raw || '未知');
+  const lower = raw.toLowerCase();
+  const hit = raw ? SOURCES.find(s => s.names.some(n => lower.includes(n))) : null;
+  // 颜色分三种情形，全部由 CSS 决定长相，这里只负责标出「是哪一种」：
+  //   品牌色（认得出来）/ 强调色（灵感，是自己写的不是采集的）/ 散列色（认不出来）
+  const mark = x.kind === 'idea' ? ' data-brand="idea"'
+             : hit ? ` data-brand="${hit.brand}"`
+             : ` style="--badge-h:${hueOf(name)}"`;
+  const badge = x.kind === 'idea' ? '“' : (hit ? hit.badge : (name.slice(0,1) || '?'));
+  return {
+    name,
+    badge,
+    html: `<span class="badge"${mark}>${esc(badge)}</span>` +
+          `<span class="src">${esc(name)}</span>`,
+  };
+}
+
+function cardHTML(x, i, mode){
+  const isList = mode === 'list';
+  const srcName = sourceOf(x).name;
+  // 标签限数：露几个跟着卡片宽度走（列多 → 卡片窄 → 少露），其余折成「+N」。
+  // 不限的话标签一多就把底栏的「星标/复制/删除」挤到第二行。
+  // 列数来自 lastCols——render 在生成卡片之前刚算过，就是这一轮的值。
+  // 全名放进 title（指针悬停能看到），完整标签列表在详情弹窗里。
+  const tagNames = (x.tags||[]).filter(t => t !== srcName && t !== '灵感' && t !== '片段');
+  const maxTags = isList ? 3 : (lastCols >= 4 ? 1 : lastCols >= 3 ? 2 : 3);
+  const shown = tagNames.slice(0, maxTags);
+  const rest = tagNames.slice(maxTags);
+  const tags = shown.map(t =>
+      `<button class="tag" data-tag="${esc(t)}" title="搜索「${esc(t)}」">${esc(t)}</button>`).join('')
+    + (rest.length ? `<span class="tagmore" title="${esc(rest.join(' · '))}">+${rest.length}</span>` : '');
+  // 出处与来源同名时（终端 / 灵感 / 随手记）只写一遍，别在 meta 行里自言自语
+  const t0 = (x.title || '').trim();
+  const showTitle = t0 && t0 !== srcName && !t0.startsWith(srcName);
+  // 出处为空 / 与来源同名时，退化为「内容类型 + 字数」，让 meta 行永远有信息量
+  const KINDTAG = { terminal:'命令行', code:'代码', chat:'摘录', note:'随手记', idea:'' };
+  const fallback = KINDTAG[x.kind] || KIND[x.kind] || '片段';
+  const words = String(x.text || '').replace(/\s+/g,' ').trim().length;
+  const metaTitle = showTitle
+    ? `<span class="title">${hl(t0)}</span>`
+    : (x.kind === 'idea'
+        ? `<span class="count">${words} 字</span>`
+        : `<span class="title">${esc(fallback)}</span><span class="count">${words} 字</span>`);
+  const acts = `      <div class="acts">
+        <button data-act="star">${x.starred ? '取消星标' : '★ 星标'}</button>
+        <button data-act="copy">复制</button>
+        <button data-act="del">删除</button>
+      </div>`;
+  // 卡片上**只有正文和标签**——来源、徽标、时间、出处全在详情弹窗里。
+  // 头部容器 `.card__head` 整个撤掉了，所以这里不再有 head 分支。
+  // 唯一例外是星标：它是用户自己按下的状态，藏起来就等于丢了反馈，
+  // 所以做成右上角的角标。绝对定位是刻意的——占一行的话，
+  // 有星标的卡片正文会比旁边低 23px，网格里一眼就看出来参差。
+  const inner = isList
+    ? `    <p class="card__text">${hl(x.text)}</p>
+    <div class="card__meta">${metaTitle}${tags ? `<span class="sep">·</span><span class="tags">${tags}</span>` : ''}</div>
+    <div class="card__foot card__foot--bare">${acts}</div>`
+    : `    <p class="card__text">${hl(x.text)}</p>
+    <div class="card__foot${tags ? '' : ' card__foot--bare'}">
+      <div class="foot__tags">${tags}</div>
+      <button class="more" data-act="more" tabindex="-1">展开全文 ›</button>${acts}
+    </div>`;
+  const starMark = x.starred ? '    <span class="card__star" title="已星标">★</span>\n' : '';
+  return `
+  <article class="card" tabindex="0" data-i="${i}" data-id="${x.id}" data-kind="${x.kind}" data-size="${sizeOf(x.text)}"${x.starred ? ' data-star="1"' : ''}>
+${starMark}${inner}
+  </article>`;
+}
+
+/* 卡片视图的标签簇（列表视图把标签放在 meta 行，两处不重叠） */
+
+const estLines = x => {
+  const t = String(x.text || '');
+  const per = Math.max(10, Math.floor(250 / 14.5));       // 卡片宽约 250px，一行约 17 个汉字
+  return t.split('\n').reduce((a, l) => a + Math.max(1, Math.ceil(l.replace(/[\u3000-\uffef]/g, 'xx').length / per)), 0);
+};
+/* 一行放几列：按「每列至少 MIN_COL_W」算，夹在 1..MAX_COLS 之间。
+   不用硬编码断点（`w >= 1080 ? 4 : …`）——面板宽度是用户自己拖出来的任意值，
+   断点会在两档之间留下一段「拖了但没反应」的区间，看起来就像没跟随。
+   GRID_GAP 与 CSS 的 --gap-grid 同源，改一处要改两处。 */
+const MIN_COL_W = 268, MAX_COLS = 6, GRID_GAP = 12;
+function colCount(width){
+  const w = Math.max(Number(width) || 0, 320);
+  return Math.max(1, Math.min(MAX_COLS, Math.floor((w + GRID_GAP) / (MIN_COL_W + GRID_GAP))));
+}
+let lastCols = 4;
+function render(){
+  const list = visible();
+  if (!list.length){
+    grid.className = 'grid is-empty';
+    grid.innerHTML = `<div class="empty">${
+      state.q ? '没有匹配的句子<br>换个更短的词，或按 Esc 清除搜索' : '库还是空的<br>选中一段文字，点一下「收录」'}</div>`;
+  } else if (state.view === 'focus'){
+    state.active = Math.max(0, Math.min(state.active, list.length - 1));
+    grid.className = 'grid focus';
+    grid.innerHTML = cardHTML(list[state.active], state.active);
+  } else if (state.view === 'list'){
+    grid.className = 'grid list';
+    grid.dataset.density = state.density;
+    grid.dataset.group = state.group ? '1' : '0';
+    if (!state.group){
+      grid.innerHTML = list.map((x, i) => cardHTML(x, i, 'list')).join('');
+    } else {
+      // 按自然日分组，同一天里保持「新 → 旧」
+      let out = '', last = null;
+      list.forEach((x, i) => {
+        const k = dayKey(x);
+        if (k !== last){
+          const n = list.filter(y => dayKey(y) === k).length;
+          out += `<div class="list-group"><span>${esc(k)}</span><span class="n">${n} 句</span></div>`;
+          last = k;
+        }
+        out += cardHTML(x, i, 'list');
+      });
+      grid.innerHTML = out;
+    }
+  } else {
+    // 卡片流：贪心分列（按预估行数塞进当前最矮的一列）。
+    // 不用等高网格，是为了让短句卡片自己收短，不至于半张卡是空白。
+    const n = colCount(grid.clientWidth); lastCols = n;
+    const cols = Array.from({ length: n }, () => ({ h: 0, items: [] }));
+    list.forEach((x, i) => {
+      const c = cols.reduce((a, b) => (a.h <= b.h ? a : b));
+      c.items.push(cardHTML(x, i));
+      c.h += estLines(x) * 26 + 78;
+    });
+    grid.className = 'grid';
+    grid.innerHTML = cols.map(c => `<div class="col">${c.items.join('')}</div>`).join('');
+  }
+  clip();
+
+  $('#tools').hidden = state.view !== 'list';
+  if (state.view === 'list'){
+    const g = $('.tbtn[data-tool=group]'), d = $('.tbtn[data-tool=density]');
+    if (g) g.setAttribute('aria-pressed', String(state.group));
+    if (d){ d.setAttribute('aria-pressed', String(state.density === 'compact')); d.textContent = state.density === 'compact' ? '紧凑' : '舒适'; }
+  }
+  markSelected();
+  // 「N 句」只在顶栏右侧的提示里显示（见下），顶栏不再单独放一个计数。
+  $('#hint').textContent = list.length === state.data.length
+    ? `${state.data.length} 句 · ${words()} 字`
+    : `${list.length} / ${state.data.length} 句`;
+  $$('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === state.view)));
+  // 只认带 data-filter 的 chip：标签入口也是 .chip，但它有自己的计数逻辑，
+  // 混进来会被写成「终端」的条数。
+  $$('.chip[data-filter]').forEach(c => {
+    const f = c.dataset.filter;
+    const n = f === 'all' ? state.data.length
+            : f === 'star' ? state.data.filter(x => x.starred).length
+            : f === 'idea' ? state.data.filter(x => x.kind === 'idea').length
+            : f === 'page' ? state.data.filter(x => x.kind === 'page').length
+            : state.data.filter(x => x.kind === 'terminal').length;
+    c.setAttribute('aria-pressed', String(f === state.filter));
+    $('.n', c).textContent = n;
+  });
+
+  // 标签入口：库里一个标签都没有时整个藏起来（别放一个点开是空的按钮）。
+  // 选中标签后，入口自己变成「标签名 + 命中条数」，再点开可以换或清除。
+  const tagItems = allTags();
+  const tb = $('#tagBtn');
+  if (tb){
+    tb.hidden = tagItems.length === 0;
+    $('#tagBtnLabel').textContent = state.tagFilter || '标签';
+    $('#tagBtnN').textContent = state.tagFilter
+      ? String(state.data.filter(x => (x.tags||[]).includes(state.tagFilter)).length)
+      : String(tagItems.length);
+    tb.setAttribute('aria-pressed', String(!!state.tagFilter));
+  }
+}
+
+function markSelected(){
+  if (state.view === 'focus' || !state.touched) return;
+  $$('.card', grid).forEach(c => c.classList.toggle('is-selected', +c.dataset.i === state.active));
+}
+
+/* 自然日分组标签 */
+/* 自然日分组标签。用日历日差而不是毫秒差：
+   毫秒差会把「昨晚 23:50」和「今天 00:10」算成同一天（都是 0 个 24 小时），
+   而它们在日历上是两天。有 capturedAt 就用绝对时间，回退到 ts（距今毫秒）。 */
+function dayKey(x){
+  const abs = Number.isFinite(x.capturedAt)
+    ? new Date(x.capturedAt)
+    : new Date(Date.now() - (Number.isFinite(x.ts) ? x.ts : 30 * 86400e3));
+  const now = new Date();
+  const midnight = d => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const days = Math.round((midnight(now) - midnight(abs)) / 86400e3);
+  const label = (d) => {
+    if (days <= 0) return '今天';
+    if (days === 1) return '昨天';
+    if (days < 7) return `${days} 天前`;
+    return d.getFullYear() === now.getFullYear()
+      ? d.toLocaleDateString('zh-CN', { month:'numeric', day:'numeric' })
+      : d.toLocaleDateString('zh-CN', { year:'numeric', month:'numeric', day:'numeric' });
+  };
+  return label(abs);
+}
+
+/* 只有真的被裁掉，才加渐隐遮罩与「展开全文」 */
+/* 先集中读、再集中写。读写交替时每次 scrollHeight 都会触发一次强制重排，
+   卡片一多就是 O(n) 次布局，这里改成两趟。 */
+function clip(){
+  const els = $$('.card__text', grid);
+  const clipped = els.map(el => el.scrollHeight - el.clientHeight > 2);
+  els.forEach((el, i) => {
+    const c = el.closest('.card');
+    if (c) c.dataset.clip = clipped[i] ? '1' : '0';
+  });
+}
+const words = () => state.data.reduce((a, x) => a + (x.text || '').length, 0).toLocaleString();
+/* 独立打开 HTML（没有原生壳）时，样例数据也要过一遍编辑覆盖 */
+state.data = applyEdits(state.data);
+
+/* ============================ 交互 ============================ */
+let toastT;
+function toast(msg, action){
+  const t = $('#toast'), b = $('#toastAct');
+  $('#toastMsg').textContent = msg;
+  if (action){ b.hidden = false; b.textContent = action.label; b.onclick = action.run; }
+  else { b.hidden = true; b.onclick = null; }
+  t.setAttribute('data-open', '');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.removeAttribute('data-open'), action ? 4000 : 1600);
+}
+function copyText(text, id){
+  const done = () => { toast('已复制（剪贴板原内容已备份）'); bridge('copy', { id, text }); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, done);
+  else done();
+}
+
+/* 打开/关闭原生 <dialog>。
+   抽出来是因为 jsdom 不实现 showModal()，测试里得退回 setAttribute('open')，
+   而详情、确认、主题三个弹窗都要走同一套判断。 */
+function openDlg(d){ if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', ''); }
+function closeDlg(d){ if (typeof d.close === 'function' && d.open) d.close(); else d.removeAttribute('open'); }
+
+/* 删除前必须确认。
+   两条路径（卡片上的删除按钮、详情里的删除）都走这里，所以确认只写一遍。
+   文案不写「回收站」：库里确实只是打软删标记，但面板没有回收站入口，
+   用户找不回来——写「移入回收站」是骗人。 */
+let pendingDelete = null;
+function remove(id){
+  const x = find(id); if (!x) return;
+  pendingDelete = id;
+  $('#confirmText').innerHTML =
+    `「<b>${esc(clipText(x.text, 42))}</b>」会从列表里消失，之后找不回来。` +
+    `<br>删除后几秒内还能在底部提示里点「撤销」。`;
+  openDlg($('#confirm'));
+}
+function clipText(s, n){
+  const t = String(s || '').replace(/\s+/g, ' ').trim();
+  return t.length > n ? t.slice(0, n) + '…' : t;
+}
+function commitDelete(){
+  const id = pendingDelete; pendingDelete = null;
+  closeDlg($('#confirm'));
+  if (!id) return;
+  const i = state.data.findIndex(x => x.id === id);
+  if (i < 0) return;
+  const [gone] = state.data.splice(i, 1);
+  state.trash = { gone, i };
+  render(); bridge('delete', { id });
+  toast('已删除', { label:'撤销', run(){
+    // 必须先认领再消费 state.trash：清晚了的话，撤销之后再按 z
+    // 会把同一条又插一遍（列表里出现两张一样的卡）。
+    if (!state.trash || state.trash.gone.id !== id) return;
+    const { gone: g, i: at } = state.trash;
+    state.trash = null;
+    state.data.splice(at, 0, g); render();
+    bridge('undo', { id });
+    toast('已恢复');
+  }});
+}
+function toggleStar(id){
+  const x = find(id); if (!x) return;
+  x.starred = !x.starred; render(); bridge('star', { id, value: x.starred });
+  toast(x.starred ? '已加星标' : '已取消星标');
+}
+
+grid.addEventListener('click', e => {
+  const tag = e.target.closest('.tag');
+  if (tag){ $('#q').value = state.q = tag.dataset.tag; render(); return; }
+  const card = e.target.closest('.card'); if (!card) return;
+  const act = e.target.closest('.acts button, .more');
+  if (act){
+    e.stopPropagation();
+    const x = find(card.dataset.id);
+    if (act.dataset.act === 'star') toggleStar(x.id);
+    if (act.dataset.act === 'copy') copyText(x.text, x.id);
+    if (act.dataset.act === 'del') remove(x.id);
+    if (act.dataset.act === 'more') openSheet(card.dataset.id);
+    return;
+  }
+  if (state.view !== 'focus'){ state.active = +card.dataset.i; markSelected(); }
+  openSheet(card.dataset.id);
+});
+
+/* 详情 / 编辑 / 新建 共用一个弹窗，靠 sheetMode 切换：
+     view —— 读态：正文 + 元信息
+     edit —— 就地编辑已有的一条（正文与标签可改，出处/时间/来源是采集事实，不可改）
+     new  —— 手动记录一条：正文 + 标签 + 出处 + 链接
+   合并成一个的原因：三种形态的骨架完全一样（textarea + 标签 + 底部按钮），
+   分开写就要维护三份渲染与三份键盘处理，迟早漂。 */
+let sheetId = null, sheetMode = 'view';
+function findSheet(){ return find(sheetId); }
+
+/* 详情弹窗的元信息表。
+   卡片上撤掉的「来源（含徽标）」与「时间」都落在这里——卡片负责扫读，
+   弹窗负责交代来路，这是这次改动的分工。 */
+function metaRows(x){
+  return `
+    <dt>来源</dt><dd><span class="srcpair">${sourceOf(x).html}</span></dd>
+    <dt>出处</dt><dd>${x.title ? esc(x.title) : '—（未取到标题）'}</dd>
+    <dt>链接</dt><dd>${x.url ? `<a href="${esc(x.url)}">${esc(x.url)}</a>` : '—（非浏览器来源）'}</dd>
+    <dt>时间</dt><dd>${esc(x.at || '')}${x.ts != null ? ' · ' + new Date(Date.now() - x.ts).toLocaleString('zh-CN', { hour12:false }) : ''}</dd>
+    <dt>标签</dt><dd>${(x.tags||[]).length ? (x.tags||[]).map(t => esc(t)).join(' · ') : '无'}</dd>
+    <dt>字数</dt><dd>${(x.text||'').length} 字</dd>`;
+}
+
+/* 可写态（编辑 / 新建共用）。新建时多两个字段：出处与链接——
+   手动记录没有「采集」这回事，出处得自己填。 */
+function editorHTML(mode){
+  const isNew = mode === 'new';
+  // 新建态不渲染文本框下面那行辅助信息（「N 字 · N 行」+「⌘↵ 保存 · Esc 取消」）。
+  // 刚打开时它报的是「0 字 · 1 行」，没有信息量，却占掉第一眼的注意力；
+  // 手动记录是个轻量动作，让它一眼只剩输入框。编辑态保留：那里字数变化才有意义。
+  const foot = isNew ? '' :
+    `<div class="edit__foot"><span id="edCount"></span>` +
+    `<span class="tip"><code>⌘↵</code> 保存 · <code>Esc</code> 取消</span></div>`;
+  return `
+    <textarea class="edit" id="edText" rows="${isNew ? 5 : 6}" spellcheck="false"
+      placeholder="${isNew ? '写点什么…' : '把句子改成你想留下的样子'}"></textarea>
+    ${foot}
+    <p class="sheet__lbl">标签</p>
+    <div class="tags__edit" id="edTags"></div>
+    ${isNew ? `
+    <div class="field">
+      <label class="field__lbl" for="edTitle">出处</label>
+      <input id="edTitle" type="text" spellcheck="false" placeholder="书名、页面标题、谁说的…（可不填）">
+    </div>
+    <div class="field">
+      <label class="field__lbl" for="edUrl">链接</label>
+      <input id="edUrl" type="url" spellcheck="false" placeholder="https://…（可不填）">
+    </div>` : ''}`;
+}
+
+function renderSheet(){
+  const isNew = sheetMode === 'new';
+  const x = isNew ? null : findSheet();
+  if (!isNew && !x){ closeSheet(); return; }
+
+  $('#sheetBody').innerHTML = isNew ? editorHTML('new')
+    : sheetMode === 'edit' ? editorHTML('edit')
+    : `<p class="sheet__text">${esc(x.text)}</p>
+       <dl class="sheet__meta">${metaRows(x)}</dl>`;
+
+  // 新建态的底栏只留两个按钮。原来左边还有一句「手动记录 · 不填出处也没关系」——
+  // 表单本身已经写着「（可不填）」，再复述一遍是纯噪音。
+  $('#sheetFoot').innerHTML = isNew ? `
+    <span class="spacer"></span>
+    <button class="btn" data-d="cancel">取消</button>
+    <button class="btn btn--accent" data-d="create">记录</button>`
+  : sheetMode === 'edit' ? `
+    <span class="edit__foot" style="margin:0">出处与时间来自采集，不可改</span>
+    <span class="spacer"></span>
+    <button class="btn" data-d="cancel">取消</button>
+    <button class="btn btn--accent" data-d="save">保存</button>`
+  : `
+    <button class="btn btn--accent" data-d="copy">复制全文</button>
+    <button class="btn" data-d="star">${x.starred ? '取消星标' : '★ 星标'}</button>
+    <button class="btn" data-d="edit">编辑</button>
+    <span class="spacer"></span>
+    <button class="btn btn--danger" data-d="del">删除</button>`;
+
+  if (isNew || sheetMode === 'edit') wireEditor(x, isNew);
+  $$('#sheetFoot .btn').forEach(b => b.onclick = () => {
+    const a = b.dataset.d;
+    if (a === 'copy') copyText(x.text, x.id);
+    if (a === 'star'){ closeSheet(); toggleStar(x.id); }
+    if (a === 'edit'){ sheetMode = 'edit'; renderSheet(); }
+    if (a === 'cancel'){ closeSheet(); }
+    if (a === 'save'){ saveEdit(); }
+    if (a === 'create'){ saveNew(); }
+    if (a === 'del'){ closeSheet(); remove(x.id); }
+  });
+}
+function openSheet(id){
+  sheetId = id; sheetMode = 'view';
+  renderSheet();
+  openDlg($('#sheet'));
+}
+/* 「＋ 记录」：不再用 window.prompt。
+   一来 WKWebView 默认不实现 prompt（要靠 WKUIDelegate 补），二来它只能收一行字，
+   而手动记录同样需要标签和出处。 */
+function openNew(){
+  sheetId = null; sheetMode = 'new';
+  renderSheet();
+  openDlg($('#sheet'));
+}
+function closeSheet(){
+  sheetMode = 'view';
+  closeDlg($('#sheet'));
+}
+$('#sheetClose').onclick = closeSheet;
+$('#sheet').addEventListener('click', e => { if (e.target === $('#sheet')) closeSheet(); });
+
+/* 标签编辑器：↵ 或「，」成词，空输入时 ⌫ 删掉最后一片，重复词直接忽略。
+   列表状态放模块级（editTags）而不是挂在某条记录上：新建时根本没有记录对象，
+   两种形态共用一份比各写一套简单。 */
+let editTags = [];
+function renderTagChips(){
+  const box = $('#edTags');
+  box.innerHTML = editTags.map((t, i) =>
+    `<span class="tagchip">${esc(t)}<button type="button" data-i="${i}" aria-label="移除">✕</button></span>`).join('')
+    + `<input class="tagadd" id="edTagAdd" placeholder="新标签" maxlength="12" autocomplete="off">`;
+  box.querySelectorAll('.tagchip button').forEach(b => b.onclick = () => {
+    editTags.splice(+b.dataset.i, 1); renderTagChips(); $('#edTagAdd').focus();
+  });
+  const inp = $('#edTagAdd');
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ',' || e.key === '，'){
+      e.preventDefault();
+      const v = inp.value.trim().replace(/,+$/, '');
+      if (v && !editTags.includes(v)) editTags.push(v);
+      inp.value = ''; renderTagChips(); $('#edTagAdd').focus();
+    } else if (e.key === 'Backspace' && !inp.value && editTags.length){
+      editTags.pop(); renderTagChips();
+    }
+  });
+}
+function wireEditor(x, isNew){
+  const ta = $('#edText'), cnt = $('#edCount');
+  ta.value = isNew ? '' : (x.text || '');
+  // 新建态没有字数那一行（见 editorHTML），所以这里不能假定 cnt 存在
+  if (cnt){
+    const count = () => { cnt.textContent = `${ta.value.length} 字 · ${ta.value.split('\n').length} 行`; };
+    ta.addEventListener('input', count); count();
+  }
+  editTags = isNew ? [] : (x.tags || []).slice();
+  renderTagChips();
+  ta.focus();
+  ta.setSelectionRange(ta.value.length, ta.value.length);
+}
+function saveEdit(){
+  const x = findSheet(); if (!x) return;
+  const text = ($('#edText').value || '').trim();
+  if (!text){ toast('句子不能空着'); $('#edText').focus(); return; }
+  const before = { text: x.text, tags: (x.tags || []).slice() };
+  const tags = editTags.map(t => t.trim()).filter(Boolean);
+  if (text === before.text && tags.join('\u0001') === before.tags.join('\u0001')){ closeSheet(); return; }
+  x.text = text; x.tags = tags;
+  persistEdit(x.id);
+  sheetMode = 'view'; renderSheet(); render();
+  bridge('edit', { id: x.id, text, tags });
+  toast('已保存', { label:'撤销', run(){
+    x.text = before.text; x.tags = before.tags;
+    persistEdit(x.id); render(); renderSheet(); toast('已还原');
+  }});
+}
+/* 手动记一条。落库同样交给原生——原生成功后会回调 Shiju.capture 把真卡片推回来，
+   卡片上的 id 才是库里的真 id（星标/删除/编辑才对得上）。
+   浏览器里单独调样式时没有原生壳，bridge 返回 false，才退化成纯本地插入。 */
+function saveNew(){
+  const text = ($('#edText').value || '').trim();
+  if (!text){ toast('写点什么再记录'); $('#edText').focus(); return; }
+  const tags = editTags.map(t => t.trim()).filter(Boolean);
+  const title = ($('#edTitle') ? $('#edTitle').value : '').trim();
+  const url = ($('#edUrl') ? $('#edUrl').value : '').trim();
+  closeSheet();
+  if (bridge('capture', { text, tags, title, url })) return;
+  Shiju.capture({ text, kind:'idea', tags, title, url });
+}
+
+/* 视图 / 筛选 / 搜索 */
+$$('.seg button').forEach(b => b.onclick = () => { state.view = b.dataset.view; render(); });
+$$('.chip').forEach(c => c.onclick = () => { state.filter = c.dataset.filter; state.active = 0; render(); });
+/* 搜索加 150ms 防抖：每次输入都会重建整个 grid，几千条时不防抖会明显卡。
+   触发时再读一次输入框，这样按 Esc 清空后挂起的定时器不会把旧词写回去。 */
+let searchTimer;
+$('#q').addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    const value = $('#q').value.trim();
+    if (value === state.q) return;
+    state.q = value; state.active = 0; render();
+  }, 150);
+});
+$$('[data-nav]').forEach(b => b.onclick = () => { state.active += +b.dataset.nav; render(); });
+$('#tools').addEventListener('click', e => {
+  const t = e.target.closest('.tbtn'); if (!t) return;
+  if (t.dataset.tool === 'group'){ state.group = !state.group; store.set(state.group ? '1' : '0', 'shiju.group'); }
+  else { state.density = state.density === 'cozy' ? 'compact' : 'cozy'; store.set(state.density, 'shiju.density'); }
+  render();
+});
+
+/* 主题 */
+function applyTheme(key, notify){
+  state.theme = key;
+  store.set(key);
+  document.documentElement.setAttribute('data-theme', key);   // 'auto' 交给 @media
+  const t = THEMES.find(x => x.key === key) || AUTO;
+  $('#themeName').textContent = t.name;
+  $('#themeSwatch').style.background = key === 'auto'
+    ? 'linear-gradient(90deg,#FFFFFF 0 50%, #262C34 50% 100%)'
+    : 'var(--color-accent)';
+  // 必须限定在 #themeList 内：标签筛选弹层复用了 .theme 这套外观，
+  // 不限定的话切主题会把标签行的 aria-pressed 一起刷掉。
+  $$('#themeList .theme').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.t === key)));
+  document.documentElement.classList.add('theme-anim');
+  setTimeout(() => document.documentElement.classList.remove('theme-anim'), 260);
+  requestAnimationFrame(clip);
+  if (notify !== false) bridge('setTheme', { value: key });
+}
+const SEC = { auto:'跟随系统', light:'浅色', dark:'深色' };
+$('#themeList').innerHTML = ['auto','light','dark'].map(sc => {
+  const items = (sc === 'auto' ? [AUTO] : THEMES).filter(t => t.scheme === sc);
+  if (!items.length) return '';
+  return `<p class="pop-sec">${SEC[sc]}</p>` + items.map(t => `
+  <button class="theme" data-t="${t.key}" aria-pressed="false">
+    <span class="dots">${t.dots.map(c => `<i style="background:${c}"></i>`).join('')}</span>
+    <span class="theme__txt"><b>${t.name}</b><span>${t.tag}</span></span>
+    <span class="check">✓</span>
+  </button>`).join('');
+}).join('');
+$$('#themeList .theme').forEach(b => b.onclick = () => { applyTheme(b.dataset.t); closePop($('#themePop')); });
+
+/* ---------- 顶栏上的两个弹层（主题、标签） ----------
+   都用「非模态 dialog」：模态会吞掉卡片区的点击，而弹层要能点外面关闭。
+   位置由 placePopover 现算：锚点在顶栏里的位置随面板宽度变，
+   写死 right 会对齐到窗口边而不是按钮下方。 */
+/* 弹层该放哪：贴锚点左沿、落在锚点下方，但左右都不许越出窗口
+   （窄面板时按钮可能已经很靠右，硬贴左沿会把弹层推出屏幕）。
+   抽成纯函数是为了能单测——真实坐标要靠布局算，jsdom 给不出来。 */
+function popoverPos(anchor, popW, viewW, margin, gapY){
+  margin = margin || 12; gapY = gapY || 6;
+  return {
+    left: Math.max(margin, Math.min(anchor.left, viewW - popW - margin)),
+    top: anchor.bottom + gapY,
+  };
+}
+function placePopover(pop, anchor){
+  if (!pop || !anchor) return;
+  const pos = popoverPos(anchor.getBoundingClientRect(), pop.offsetWidth || 296, window.innerWidth);
+  pop.style.left = pos.left + 'px';
+  pop.style.right = 'auto';
+  pop.style.top = pos.top + 'px';
+}
+/* 只用 dialog 的 open 属性：跨 WebKit / Blink 都成立，不用 :open
+   （旧内核不认这个选择器，会让整条事件链抛异常） */
+function closePop(pop){
+  if (!pop) return;
+  pop.removeAttribute('open');
+  if (pop.hidePopover) try { pop.hidePopover(); } catch (_){}
+  const btn = pop.id === 'themePop' ? $('#themeBtn') : $('#tagBtn');
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+function openPop(pop, anchor){
+  if (pop.showPopover){ try { pop.showPopover(); } catch (_){ pop.setAttribute('open',''); } }
+  else pop.setAttribute('open','');
+  anchor.setAttribute('aria-expanded', 'true');
+  placePopover(pop, anchor);
+}
+$('#themeBtn').onclick = () => {
+  const p = $('#themePop');
+  if (p.open){ closePop(p); return; }
+  openPop(p, $('#themeBtn'));
+  /* 主题一多，「当前用的是哪一套」很可能在滚动区外面：打开时把它滚进视野 */
+  const sel = $('#themeList .theme[aria-pressed="true"]'), box = $('#themeList');
+  if (sel && box && typeof sel.scrollIntoView === 'function') sel.scrollIntoView({ block:'nearest' });
+};
+$('#tagBtn').onclick = () => {
+  const p = $('#tagPop');
+  if (p.open){ closePop(p); return; }
+  renderTagList();
+  openPop(p, $('#tagBtn'));
+};
+$('#tagList').addEventListener('click', e => {
+  const b = e.target.closest('[data-tag]'); if (!b) return;
+  state.tagFilter = b.dataset.tag || null;   // 空串 = 清除筛选
+  state.active = 0;
+  closePop($('#tagPop'));
+  render();
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('#themePop') && !e.target.closest('#themeBtn')) closePop($('#themePop'));
+  if (!e.target.closest('#tagPop') && !e.target.closest('#tagBtn')) closePop($('#tagPop'));
+});
+
+/* 库里出现过的全部标签 + 次数，按次数降序（同次数的按拼音/字典序，保证顺序稳定）。
+   用它做两件事：筛选弹层的列表，以及「标签」入口该不该出现。 */
+function allTags(){
+  const m = new Map();
+  state.data.forEach(x => (x.tags || []).forEach(t => {
+    const k = String(t).trim(); if (!k) return;
+    m.set(k, (m.get(k) || 0) + 1);
+  }));
+  return [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh'));
+}
+function renderTagList(){
+  const items = allTags(), box = $('#tagList');
+  if (!items.length){ box.innerHTML = '<p class="pop-empty">还没有标签。打开一条句子，点「编辑」就能加。</p>'; return; }
+  box.innerHTML = items.map(([t, n]) => `
+  <button class="theme tagrow" data-tag="${esc(t)}" aria-pressed="${state.tagFilter === t}">
+    <span class="theme__txt"><b>${esc(t)}</b></span>
+    <span class="n">${n}</span><span class="check">✓</span>
+  </button>`).join('')
+  + (state.tagFilter ? `
+  <button class="theme tagrow tagrow--clear" data-tag="">
+    <span class="theme__txt"><b>清除筛选</b></span>
+  </button>` : '');
+}
+
+/* 快捷键：面板场景只需要这几个 */
+document.addEventListener('keydown', e => {
+  const typing = /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName);
+  const sheetOpen = $('#sheet').open;
+  const confirmOpen = $('#confirm').open;
+  /* 编辑/新建态里 ⌘↵ = 保存；textarea 内的 ↵ 仍按「换行」处理，别抢 */
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && (sheetMode === 'edit' || sheetMode === 'new')){
+    e.preventDefault();
+    if (sheetMode === 'edit') saveEdit(); else saveNew();
+    return;
+  }
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === 'Escape'){
+    /* 逐层退出：确认 → 编辑态 → 回读态 → 关详情 → 清搜索。
+       在输入框里按 Esc 不该把搜索词抹掉 */
+    closePop($('#themePop'));
+    closePop($('#tagPop'));
+    if (confirmOpen){ pendingDelete = null; closeDlg($('#confirm')); return; }
+    if (sheetMode === 'edit'){ sheetMode = 'view'; renderSheet(); return; }
+    if (sheetOpen){ closeSheet(); return; }
+    if (typing && document.activeElement === $('#q')){ $('#q').value = state.q = ''; render(); document.activeElement.blur(); }
+    return;
+  }
+  if (typing) return;
+  /* 有弹窗开着时，列表快捷键一律不响应——否则在确认框上按一下 Delete
+     或者 s，动的都是后面那张看不见的卡片。 */
+  if (sheetOpen || confirmOpen || $('#themePop').open || $('#tagPop').open) return;
+  const list = visible();
+  const move = d => {
+    if (!list.length) return;
+    state.touched = true;
+    state.active = Math.max(0, Math.min(list.length - 1, state.active + d));
+    render();
+    const el = $$('.card', grid)[state.view === 'list' ? state.active : state.active];
+    if (el && el.scrollIntoView) el.scrollIntoView({ block:'nearest' });
+  };
+  switch (e.key){
+    case '/': e.preventDefault(); $('#q').focus(); break;
+    case 'g': state.view = 'grid'; render(); break;
+    case 'l': state.view = 'list'; render(); break;
+    case 'f': state.view = 'focus'; render(); break;
+    case 'j': case 'ArrowDown': move(1); break;
+    case 'k': case 'ArrowUp': move(-1); break;
+    case 'ArrowRight': case 'n': if (state.view === 'focus') move(1); break;
+    case 'ArrowLeft':  case 'p': if (state.view === 'focus') move(-1); break;
+    case 'd': if (state.view === 'list'){ state.density = state.density === 'cozy' ? 'compact' : 'cozy'; store.set(state.density, 'shiju.density'); render(); } break;
+    case 'Enter': if (list[state.active]) openSheet(list[state.active].id); break;
+    case 'e': if (list[state.active]){ openSheet(list[state.active].id); sheetMode = 'edit'; renderSheet(); } break;
+    case 's': if (list[state.active]) toggleStar(list[state.active].id); break;
+    case 'c': if (list[state.active]) copyText(list[state.active].text, list[state.active].id); break;
+    case 'Backspace': case 'Delete': if (list[state.active]) remove(list[state.active].id); break;
+    case 'z':
+      // 只 splice 本地数组是不够的：库里 deleted_at 还留着，下次打开面板这条就消失了。
+      if (state.trash){
+        const { gone, i } = state.trash;
+        state.trash = null;
+        state.data.splice(i, 0, gone); render();
+        bridge('undo', { id: gone.id });
+        toast('已恢复');
+      }
+      break;
+    case 't': applyTheme(THEMES[(THEMES.findIndex(x => x.key === state.theme) + 1) % THEMES.length].key); break;
+    default:
+      if (e.key === '0') applyTheme(AUTO.key);
+      else if (/^[1-9]$/.test(e.key)){ const t = THEMES[+e.key - 1]; if (t) applyTheme(t.key); }
+  }
+});
+
+/* 「＋ 记录」：面板里的临时输入（真正的入口仍是选区浮出的按钮）。
+   落库一律交给原生，原生成功后会回调 Shiju.capture 把真卡片推回来——
+   这样卡片上的 id 永远是数据库里的真 id，后面的星标/删除/编辑才对得上。
+   浏览器里单独调样式时没有原生壳，bridge 返回 false，才退化成纯本地插入。 */
+/* 「＋ 记录」：打开和「编辑」同款的弹窗，能填正文、标签、出处、链接。
+   原来用 window.prompt —— 只能收一行字，而且 WKWebView 默认不实现它。 */
+$('#addBtn').onclick = openNew;
+
+/* 快捷键设置：交给原生开那个小窗口（自绘录制控件，浏览器里做不了）。
+   入口放这里是因为它**必须一眼看得见**——早先只挂在「右键菜单栏图标」里，
+   用户压根找不到，反馈就是「没看到设置入口」。
+   浏览器里单独调样式时 bridge 返回 false，这里静默无效，不影响预览。 */
+$('#settingsBtn').onclick = () => bridge('settings');
+
+/* 确认弹窗的两个出口。确认键只接受点击，不绑 ↵——
+   删除是不可逆的，不该被一个顺手的回车带走。 */
+$('#confirmCancel').onclick = () => { pendingDelete = null; closeDlg($('#confirm')); };
+$('#confirmOk').onclick = commitDelete;
+$('#confirm').addEventListener('click', e => {
+  if (e.target === $('#confirm')){ pendingDelete = null; closeDlg($('#confirm')); }
+});
+
+/* 拖动顶栏移动窗口。
+ *
+ * 为什么不能用 CSS：`-webkit-app-region: drag` 是 Electron 的私有属性，
+ * WKWebView 根本不实现它——写上只会让人以为「拖动已经支持了」，
+ * 然后对着拖不动的窗口找别的原因。
+ *
+ * 所以自己接管：在顶栏的空白处按下 → 通知原生让窗口跟着鼠标走。
+ * 落在控件上的按下不拦截，否则按钮就点不动了（等价于 Electron 的 no-drag）。 */
+(function bindWindowDrag(){
+  const bar = document.querySelector('.topbar');
+  if (!bar) return;
+  bar.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;                       // 只认左键
+    if (e.target.closest('button, input, label, a')) return;   // 控件自己处理
+    e.preventDefault();                               // 别顺手选中文字
+    bridge('startDrag');
+  });
+})();
+
+/* ============================ 原生调用的入口 ============================ */
+window.Shiju = {
+  /* 原生把 SQLite 查出来的整批数据交进来，视图状态重置 */
+  hydrate(rows){
+    if (!Array.isArray(rows)) return;
+    state.data = applyEdits(rows);
+    state.q = ''; state.filter = 'all'; state.tagFilter = null;
+    state.active = 0; $('#q').value = '';
+    render();
+  },
+  /* 收录成功：插到最前 + 入场动画 + 3 秒撤销。
+     【只渲染，不回传】——落库是原生的事（原生调 pushCaptured 走进来），
+     这里再 bridge('capture') 会插两次：一次假 id、一次真 id。
+     id 缺省时兜个本地 id，只用于浏览器预览。 */
+  capture(o){
+    const x = Object.assign({ kind:'page', at:'刚刚', ts:0 }, o);
+    if (!x.id) x.id = 'local' + Date.now().toString(36);
+    state.data.unshift(x);
+    // 刚收录的东西必须看得见：清掉搜索与筛选，否则新卡片会被它们挡在外面
+    state.q = ''; state.filter = 'all'; state.tagFilter = null;
+    state.active = 0; $('#q').value = '';
+    state.view = 'grid';
+    render();
+    const c = $('.card', grid);
+    if (c) c.animate(
+      [{ opacity:0, transform:'translateY(6px) scale(.99)' }, { opacity:1, transform:'none' }],
+      { duration:260, easing:'cubic-bezier(.32,.72,0,1)' });
+    toast('已收录', { label:'撤销', run(){
+      state.data = state.data.filter(y => y.id !== x.id); render();
+      // discard 而不是 undo：这行是几秒前才插进去的，硬删等价于「这次收录没发生过」。
+      // 若走 undo(restore) 是空操作，且软删会让同一句话以后再也收不进来（去重命中）。
+      bridge('discard', { id: x.id });
+    }});
+  },
+  setTheme: k => applyTheme(k, false),
+  append(rows){ if (Array.isArray(rows)){ state.data = applyEdits(rows).concat(state.data); render(); } },
+  /* 详情里改了正文/标签 → 走同一个 edit 通道给原生落库；这里返回 false 表示「不可改」 */
+  edits: edits,
+  setEdited(id, patch){
+    const x = find(id); if (!x) return false;
+    if (typeof patch.text === 'string' && patch.text.trim()){
+      x.text = patch.text.trim();
+      x.tags = Array.isArray(patch.tags) ? patch.tags.filter(t => String(t).trim()).map(String) : (x.tags || []);
+      persistEdit(id); render(); return true;
+    }
+    return false;
+  },
+};
+function relayout(){ const n = colCount(grid.clientWidth); if (state.view === 'grid' && n !== lastCols) render(); else clip(); }
+window.addEventListener('resize', () => {
+  clearTimeout(relayout._t); relayout._t = setTimeout(relayout, 120);
+  // 弹层贴在锚点下方，锚点跟着顶栏一起动，所以也要重算位置
+  const t = $('#themePop'), g = $('#tagPop');
+  if (t && t.open) placePopover(t, $('#themeBtn'));
+  if (g && g.open) placePopover(g, $('#tagBtn'));
+});
+
+applyTheme(state.theme, false);
+render();
+</script>
+</body>
+</html>
